@@ -1,0 +1,1230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Prompt Engineering Guide — Claude AI</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --ink: #1a1a2e;
+    --ink2: #2d2d44;
+    --muted: #6b6b8a;
+    --muted2: #9393b0;
+    --bg: #f5f4f0;
+    --bg2: #eceae4;
+    --bg3: #ffffff;
+    --accent: #e8533e;
+    --accent2: #f2a24a;
+    --blue: #3b6fd4;
+    --teal: #1d9e75;
+    --purple: #7c5cbf;
+    --border: rgba(26,26,46,0.12);
+    --border2: rgba(26,26,46,0.07);
+    --r: 12px;
+    --r2: 8px;
+    --r3: 20px;
+  }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    line-height: 1.6;
+    font-size: 15px;
+  }
+
+  /* ── HERO ── */
+  .hero {
+    background: var(--ink);
+    color: #fff;
+    padding: 72px 48px 56px;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+      -45deg,
+      transparent, transparent 40px,
+      rgba(255,255,255,0.015) 40px, rgba(255,255,255,0.015) 41px
+    );
+  }
+  .hero-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(232,83,62,0.18);
+    border: 1px solid rgba(232,83,62,0.35);
+    color: #ff8a75;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 4px 12px;
+    border-radius: 40px;
+    margin-bottom: 24px;
+  }
+  .hero h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(36px, 5vw, 64px);
+    font-weight: 800;
+    line-height: 1.1;
+    max-width: 680px;
+    margin-bottom: 18px;
+  }
+  .hero h1 span { color: var(--accent2); }
+  .hero p {
+    font-size: 16px;
+    color: rgba(255,255,255,0.62);
+    max-width: 540px;
+    line-height: 1.7;
+  }
+  .hero-grid {
+    display: grid;
+    grid-template-columns: 1fr 320px;
+    gap: 40px;
+    align-items: center;
+    position: relative;
+    z-index: 1;
+  }
+  .hero-stats {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .stat-pill {
+    background: rgba(255,255,255,0.07);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: var(--r);
+    padding: 14px 18px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .stat-icon {
+    width: 36px; height: 36px;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+    flex-shrink: 0;
+  }
+  .stat-label { font-size: 12px; color: rgba(255,255,255,0.45); }
+  .stat-val { font-size: 15px; font-weight: 500; color: #fff; }
+
+  /* ── LAYOUT ── */
+  .wrapper { max-width: 1100px; margin: 0 auto; padding: 0 32px; }
+  .section { padding: 64px 0; }
+  .section-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 8px;
+  }
+  .section-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(24px, 3vw, 36px);
+    font-weight: 700;
+    margin-bottom: 8px;
+    line-height: 1.2;
+  }
+  .section-sub {
+    font-size: 15px;
+    color: var(--muted);
+    max-width: 580px;
+    margin-bottom: 40px;
+  }
+  hr.divider {
+    border: none;
+    border-top: 1px solid var(--border2);
+    margin: 0;
+  }
+
+  /* ── ANATOMY ── */
+  .anatomy-wrap {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: var(--r3);
+    overflow: hidden;
+  }
+  .anatomy-prompt {
+    background: var(--ink);
+    padding: 28px 32px;
+    font-family: 'DM Mono', monospace;
+    font-size: 14px;
+    color: rgba(255,255,255,0.85);
+    line-height: 1.8;
+    position: relative;
+  }
+  .anatomy-prompt .label {
+    display: inline-block;
+    padding: 1px 7px;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin-right: 6px;
+    vertical-align: middle;
+    position: relative;
+    top: -1px;
+  }
+  .lbl-role   { background: rgba(232,83,62,0.25); color: #ff8a75; }
+  .lbl-ctx    { background: rgba(59,111,212,0.25); color: #82a8ff; }
+  .lbl-task   { background: rgba(29,158,117,0.25); color: #5dd8b0; }
+  .lbl-fmt    { background: rgba(242,162,74,0.25); color: #ffd08a; }
+  .lbl-const  { background: rgba(124,92,191,0.25); color: #c4aaff; }
+
+  .anatomy-parts {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    border-top: 1px solid var(--border2);
+  }
+  .anatomy-part {
+    padding: 20px 20px;
+    border-right: 1px solid var(--border2);
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .anatomy-part:last-child { border-right: none; }
+  .anatomy-part:hover { background: var(--bg2); }
+  .part-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    margin-bottom: 10px;
+  }
+  .anatomy-part h4 { font-size: 13px; font-weight: 600; margin-bottom: 4px; }
+  .anatomy-part p { font-size: 12px; color: var(--muted); line-height: 1.5; }
+
+  /* ── PROCESS FLOW ── */
+  .flow-container {
+    display: flex;
+    align-items: flex-start;
+    gap: 0;
+    overflow-x: auto;
+    padding-bottom: 8px;
+  }
+  .flow-step {
+    flex: 1;
+    min-width: 160px;
+    position: relative;
+  }
+  .flow-step::after {
+    content: '→';
+    position: absolute;
+    right: -12px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 18px;
+    color: var(--muted2);
+    z-index: 2;
+  }
+  .flow-step:last-child::after { display: none; }
+  .flow-card {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: var(--r);
+    padding: 20px 18px;
+    margin-right: 24px;
+    height: 100%;
+    transition: box-shadow 0.2s, transform 0.2s;
+    cursor: default;
+  }
+  .flow-card:hover {
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    transform: translateY(-2px);
+  }
+  .flow-num {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px;
+    font-weight: 600;
+    margin-bottom: 12px;
+    font-family: 'DM Mono', monospace;
+  }
+  .flow-card h4 { font-size: 13px; font-weight: 600; margin-bottom: 6px; }
+  .flow-card p { font-size: 12px; color: var(--muted); line-height: 1.5; }
+  .flow-tag {
+    display: inline-block;
+    margin-top: 10px;
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 20px;
+    font-weight: 500;
+    font-family: 'DM Mono', monospace;
+  }
+
+  /* ── QUALITY SPECTRUM ── */
+  .quality-tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+  }
+  .qtab {
+    padding: 8px 20px;
+    border-radius: 40px;
+    border: 1px solid var(--border);
+    background: var(--bg3);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .qtab:hover { border-color: var(--ink); }
+  .qtab.active { background: var(--ink); color: #fff; border-color: var(--ink); }
+  .qtab .dot { width: 7px; height: 7px; border-radius: 50%; }
+
+  .quality-panel { display: none; }
+  .quality-panel.active { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+
+  .qcard {
+    background: var(--bg3);
+    border-radius: var(--r);
+    overflow: hidden;
+    border: 1px solid var(--border);
+  }
+  .qcard-head {
+    padding: 14px 18px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .qcard-title { font-size: 13px; font-weight: 600; }
+  .qcard-badge {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 3px 10px;
+    border-radius: 20px;
+  }
+  .qcard-prompt {
+    padding: 16px 18px;
+    background: var(--bg2);
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    line-height: 1.7;
+    color: var(--ink2);
+    border-top: 1px solid var(--border2);
+    border-bottom: 1px solid var(--border2);
+    white-space: pre-wrap;
+  }
+  .qcard-issues { padding: 14px 18px; }
+  .issue-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    font-size: 12px;
+    color: var(--muted);
+    margin-bottom: 8px;
+    line-height: 1.5;
+  }
+  .issue-item:last-child { margin-bottom: 0; }
+  .issue-icon { flex-shrink: 0; width: 16px; height: 16px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 700; margin-top: 1px; }
+
+  /* quality colors */
+  .q-poor  .qcard-head { background: rgba(224,67,67,0.06); }
+  .q-poor  .qcard-badge { background: rgba(224,67,67,0.12); color: #b33; }
+  .q-avg   .qcard-head { background: rgba(242,162,74,0.06); }
+  .q-avg   .qcard-badge { background: rgba(242,162,74,0.15); color: #8a5500; }
+  .q-nice  .qcard-head { background: rgba(59,111,212,0.06); }
+  .q-nice  .qcard-badge { background: rgba(59,111,212,0.12); color: #1a4aa0; }
+  .q-prec  .qcard-head { background: rgba(29,158,117,0.06); }
+  .q-prec  .qcard-badge { background: rgba(29,158,117,0.12); color: #0d5c40; }
+
+  /* ── COMPARISON TABLE ── */
+  .comp-table { width: 100%; border-collapse: separate; border-spacing: 0; }
+  .comp-table thead th {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    padding: 12px 16px;
+    font-size: 12px;
+    font-weight: 600;
+    text-align: left;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+  }
+  .comp-table thead th:first-child { border-radius: var(--r2) 0 0 0; }
+  .comp-table thead th:last-child { border-radius: 0 var(--r2) 0 0; }
+  .comp-table tbody td {
+    background: var(--bg3);
+    border: 1px solid var(--border2);
+    padding: 12px 16px;
+    font-size: 13px;
+    vertical-align: top;
+    line-height: 1.5;
+  }
+  .comp-table tbody td:first-child { font-weight: 600; color: var(--ink2); }
+  .cell-poor  { color: #b33; }
+  .cell-avg   { color: #8a5500; }
+  .cell-nice  { color: #1a4aa0; }
+  .cell-prec  { color: #0d5c40; font-weight: 500; }
+
+  /* ── BEST PRACTICES ── */
+  .practices-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 16px;
+  }
+  .practice-card {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: var(--r);
+    padding: 20px 22px;
+    transition: box-shadow 0.2s;
+  }
+  .practice-card:hover { box-shadow: 0 3px 16px rgba(0,0,0,0.07); }
+  .practice-icon {
+    width: 40px; height: 40px;
+    border-radius: var(--r2);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+    margin-bottom: 14px;
+  }
+  .practice-card h4 { font-size: 14px; font-weight: 600; margin-bottom: 6px; }
+  .practice-card p  { font-size: 13px; color: var(--muted); line-height: 1.55; }
+  .practice-card code {
+    background: var(--bg2);
+    border: 1px solid var(--border2);
+    border-radius: 4px;
+    padding: 1px 5px;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--purple);
+  }
+
+  /* ── TEMPLATE ── */
+  .template-block {
+    background: var(--ink);
+    border-radius: var(--r3);
+    padding: 36px 40px;
+    position: relative;
+    overflow: hidden;
+  }
+  .template-block::before {
+    content: '';
+    position: absolute;
+    top: -60px; right: -60px;
+    width: 220px; height: 220px;
+    background: radial-gradient(circle, rgba(232,83,62,0.18) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .template-block h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 22px;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 6px;
+  }
+  .template-block .sub { color: rgba(255,255,255,0.48); font-size: 14px; margin-bottom: 28px; }
+  .template-code {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: var(--r);
+    padding: 24px 28px;
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    line-height: 1.9;
+    color: rgba(255,255,255,0.82);
+    position: relative;
+    z-index: 1;
+  }
+  .tpl-comment { color: rgba(255,255,255,0.32); }
+  .tpl-key { color: #82a8ff; }
+  .tpl-val { color: #ffd08a; }
+  .tpl-bracket { color: rgba(255,255,255,0.5); }
+
+  /* ── CHEAT SHEET ── */
+  .cheat-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+  .cheat-card {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: var(--r);
+    overflow: hidden;
+  }
+  .cheat-head {
+    background: var(--bg2);
+    padding: 10px 16px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: var(--muted);
+    border-bottom: 1px solid var(--border2);
+    display: flex;
+    align-items: center;
+    gap: 7px;
+  }
+  .cheat-head-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+  .cheat-list { padding: 14px 16px; }
+  .cheat-item {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    font-size: 13px;
+    margin-bottom: 9px;
+    line-height: 1.5;
+  }
+  .cheat-item:last-child { margin-bottom: 0; }
+  .cheat-item::before {
+    content: '→';
+    color: var(--muted2);
+    font-size: 11px;
+    flex-shrink: 0;
+    line-height: 1.8;
+  }
+
+  /* ── FOOTER ── */
+  .footer {
+    background: var(--ink);
+    color: rgba(255,255,255,0.42);
+    text-align: center;
+    padding: 28px 32px;
+    font-size: 12px;
+    letter-spacing: 0.02em;
+  }
+  .footer strong { color: rgba(255,255,255,0.7); font-weight: 500; }
+
+  /* ── SCORE BAR ── */
+  .score-row { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; font-size: 12px; }
+  .score-label { width: 90px; color: var(--muted); flex-shrink: 0; }
+  .score-track { flex: 1; height: 6px; background: var(--bg2); border-radius: 6px; overflow: hidden; }
+  .score-fill  { height: 100%; border-radius: 6px; transition: width 0.5s ease; }
+  .score-val   { width: 30px; text-align: right; font-family: 'DM Mono', monospace; font-weight: 500; font-size: 12px; }
+
+  @media (max-width: 768px) {
+    .hero-grid { grid-template-columns: 1fr; }
+    .hero-stats { display: none; }
+    .anatomy-parts { grid-template-columns: repeat(3, 1fr); }
+    .quality-panel.active { grid-template-columns: 1fr; }
+    .cheat-grid { grid-template-columns: 1fr; }
+    .flow-container { gap: 8px; }
+    .wrapper { padding: 0 20px; }
+    .hero { padding: 48px 20px 40px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══ HERO ═══ -->
+<header class="hero">
+  <div class="hero-grid">
+    <div>
+      <div class="hero-tag">AI Prompt Engineering</div>
+      <h1>The Art of <span>Precise</span> Prompting</h1>
+      <p>A complete visual guide to crafting prompts that get exactly what you need from Claude — from anatomy to processing to real-world examples.</p>
+    </div>
+    <div class="hero-stats">
+      <div class="stat-pill">
+        <div class="stat-icon" style="background:rgba(232,83,62,0.2);">🎯</div>
+        <div>
+          <div class="stat-label">5 Prompt Components</div>
+          <div class="stat-val">Role · Context · Task · Format · Constraints</div>
+        </div>
+      </div>
+      <div class="stat-pill">
+        <div class="stat-icon" style="background:rgba(59,111,212,0.2);">⚙️</div>
+        <div>
+          <div class="stat-label">7 Processing Stages</div>
+          <div class="stat-val">How Claude decodes your intent</div>
+        </div>
+      </div>
+      <div class="stat-pill">
+        <div class="stat-icon" style="background:rgba(29,158,117,0.2);">📊</div>
+        <div>
+          <div class="stat-label">4 Quality Levels</div>
+          <div class="stat-val">Poor → Average → Nice → Precise</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- ═══ ANATOMY ═══ -->
+<section class="section" style="background: var(--bg3); padding-top: 64px;">
+  <div class="wrapper">
+    <div class="section-label">Section 01</div>
+    <div class="section-title">Anatomy of an Ideal Prompt</div>
+    <p class="section-sub">Every great prompt is built from five foundational components. Miss one and you leave Claude guessing.</p>
+
+    <div class="anatomy-wrap">
+      <div class="anatomy-prompt">
+        <div style="margin-bottom: 14px;"><span class="label lbl-role">ROLE</span><span style="color:#ff8a75;">You are a senior Python developer specializing in data pipelines.</span></div>
+        <div style="margin-bottom: 14px;"><span class="label lbl-ctx">CONTEXT</span><span style="color:#82a8ff;">I have a CSV file with 500k rows. It has columns: user_id, event_type, timestamp, value. The pipeline currently takes 45 minutes.</span></div>
+        <div style="margin-bottom: 14px;"><span class="label lbl-task">TASK</span><span style="color:#5dd8b0;">Rewrite the processing function to use pandas vectorized operations instead of row-by-row iteration. Focus on the aggregate step.</span></div>
+        <div style="margin-bottom: 14px;"><span class="label lbl-fmt">FORMAT</span><span style="color:#ffd08a;">Provide: (1) the refactored function, (2) a before/after comparison, (3) expected speedup estimate.</span></div>
+        <div><span class="label lbl-const">CONSTRAINTS</span><span style="color:#c4aaff;">Use only pandas and numpy. Python 3.10+. No external dependencies. Preserve the existing function signature.</span></div>
+      </div>
+      <div class="anatomy-parts">
+        <div class="anatomy-part" style="border-top: 3px solid #e8533e;">
+          <div class="part-dot" style="background:#e8533e;"></div>
+          <h4>Role</h4>
+          <p>Sets Claude's perspective, expertise level, and behavioral frame for the entire conversation.</p>
+        </div>
+        <div class="anatomy-part" style="border-top: 3px solid #3b6fd4;">
+          <div class="part-dot" style="background:#3b6fd4;"></div>
+          <h4>Context</h4>
+          <p>Provides the background, current state, data shape, or situation Claude needs to understand your problem.</p>
+        </div>
+        <div class="anatomy-part" style="border-top: 3px solid #1d9e75;">
+          <div class="part-dot" style="background:#1d9e75;"></div>
+          <h4>Task</h4>
+          <p>The explicit, specific action you want Claude to perform. Use strong verbs: rewrite, analyze, compare, generate.</p>
+        </div>
+        <div class="anatomy-part" style="border-top: 3px solid #f2a24a;">
+          <div class="part-dot" style="background:#f2a24a;"></div>
+          <h4>Format</h4>
+          <p>Desired output structure: numbered list, code block, table, JSON, essay, bullet points, step-by-step.</p>
+        </div>
+        <div class="anatomy-part" style="border-top: 3px solid #7c5cbf;">
+          <div class="part-dot" style="background:#7c5cbf;"></div>
+          <h4>Constraints</h4>
+          <p>Boundaries, limitations, must-haves, and must-avoids that prevent incorrect assumptions.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- ═══ PROCESSING FLOW ═══ -->
+<section class="section">
+  <div class="wrapper">
+    <div class="section-label">Section 02</div>
+    <div class="section-title">How Claude Processes Your Prompt</div>
+    <p class="section-sub">Behind every response is a multi-stage internal process. Understanding it helps you write prompts that align with how the model thinks.</p>
+
+    <div class="flow-container">
+
+      <div class="flow-step">
+        <div class="flow-card">
+          <div class="flow-num" style="background:rgba(232,83,62,0.12); color:var(--accent);">01</div>
+          <h4>Tokenization</h4>
+          <p>Your prompt is split into tokens (roughly word-pieces). Context window size limits total tokens in + out.</p>
+          <span class="flow-tag" style="background:rgba(232,83,62,0.1); color:var(--accent);">~milliseconds</span>
+        </div>
+      </div>
+
+      <div class="flow-step">
+        <div class="flow-card">
+          <div class="flow-num" style="background:rgba(59,111,212,0.12); color:var(--blue);">02</div>
+          <h4>Intent Parsing</h4>
+          <p>Claude identifies the core request type: question, generation, transformation, analysis, or conversation.</p>
+          <span class="flow-tag" style="background:rgba(59,111,212,0.1); color:var(--blue);">semantic layer</span>
+        </div>
+      </div>
+
+      <div class="flow-step">
+        <div class="flow-card">
+          <div class="flow-num" style="background:rgba(124,92,191,0.12); color:var(--purple);">03</div>
+          <h4>Context Weighting</h4>
+          <p>Attention mechanisms assign weight to different parts of your prompt. Earlier context and clear specifics get higher weight.</p>
+          <span class="flow-tag" style="background:rgba(124,92,191,0.1); color:var(--purple);">attention</span>
+        </div>
+      </div>
+
+      <div class="flow-step">
+        <div class="flow-card">
+          <div class="flow-num" style="background:rgba(242,162,74,0.12); color:var(--accent2);">04</div>
+          <h4>Knowledge Retrieval</h4>
+          <p>Relevant training knowledge is activated and weighted against your specific context and constraints.</p>
+          <span class="flow-tag" style="background:rgba(242,162,74,0.1); color:var(--accent2);">parametric memory</span>
+        </div>
+      </div>
+
+      <div class="flow-step">
+        <div class="flow-card">
+          <div class="flow-num" style="background:rgba(29,158,117,0.12); color:var(--teal);">05</div>
+          <h4>Chain-of-Thought</h4>
+          <p>For complex tasks, internal reasoning steps are generated (especially with "think step by step" prompting).</p>
+          <span class="flow-tag" style="background:rgba(29,158,117,0.1); color:var(--teal);">reasoning</span>
+        </div>
+      </div>
+
+      <div class="flow-step">
+        <div class="flow-card">
+          <div class="flow-num" style="background:rgba(232,83,62,0.12); color:var(--accent);">06</div>
+          <h4>Format Assembly</h4>
+          <p>The response is structured according to detected format signals: code blocks, headers, lists, or prose.</p>
+          <span class="flow-tag" style="background:rgba(232,83,62,0.1); color:var(--accent);">output structure</span>
+        </div>
+      </div>
+
+      <div class="flow-step">
+        <div class="flow-card">
+          <div class="flow-num" style="background:rgba(59,111,212,0.12); color:var(--blue);">07</div>
+          <h4>Token Generation</h4>
+          <p>Output tokens are generated autoregressively — each word influences the next. Precision in your prompt = precision in output.</p>
+          <span class="flow-tag" style="background:rgba(59,111,212,0.1); color:var(--blue);">autoregressive</span>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Insight box -->
+    <div style="margin-top:32px; background:rgba(59,111,212,0.06); border:1px solid rgba(59,111,212,0.18); border-radius:var(--r); padding:20px 24px; display:flex; gap:16px;">
+      <div style="font-size:20px; flex-shrink:0; margin-top:2px;">💡</div>
+      <div>
+        <div style="font-weight:600; font-size:14px; margin-bottom:6px; color:var(--blue);">Why this matters for prompting</div>
+        <p style="font-size:13px; color:var(--muted); line-height:1.6;">Claude doesn't "understand" your prompt the way a human would — it computes probability distributions over tokens. This means <strong style="color:var(--ink);">ambiguous prompts produce unpredictable outputs</strong>. Every specific detail you provide narrows the distribution toward your intended answer. Structure signals (like "respond in JSON" or "step by step") directly influence the format assembly stage.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- ═══ QUALITY SPECTRUM ═══ -->
+<section class="section" style="background:var(--bg3);">
+  <div class="wrapper">
+    <div class="section-label">Section 03</div>
+    <div class="section-title">The Quality Spectrum</div>
+    <p class="section-sub">Same task, four levels of prompt quality. See how specificity transforms the output Claude can provide.</p>
+
+    <!-- Tabs -->
+    <div class="quality-tabs">
+      <button class="qtab active" onclick="switchTab('poor', this)">
+        <span class="dot" style="background:#e04343;"></span> Poor
+      </button>
+      <button class="qtab" onclick="switchTab('avg', this)">
+        <span class="dot" style="background:#f2a24a;"></span> Average
+      </button>
+      <button class="qtab" onclick="switchTab('nice', this)">
+        <span class="dot" style="background:#3b6fd4;"></span> Nice
+      </button>
+      <button class="qtab" onclick="switchTab('prec', this)">
+        <span class="dot" style="background:#1d9e75;"></span> Precise
+      </button>
+    </div>
+
+    <!-- POOR -->
+    <div class="quality-panel active" id="panel-poor">
+      <div class="qcard q-poor">
+        <div class="qcard-head">
+          <div class="qcard-title">Example 1 — Writing Task</div>
+          <div class="qcard-badge">Poor</div>
+        </div>
+        <div class="qcard-prompt">Write something about marketing.</div>
+        <div class="qcard-issues">
+          <div class="issue-item">
+            <div class="issue-icon" style="background:#ffe0e0; color:#b33;">✗</div>
+            No audience, product, goal, tone, or format specified
+          </div>
+          <div class="issue-item">
+            <div class="issue-icon" style="background:#ffe0e0; color:#b33;">✗</div>
+            "Something" gives zero directional signal
+          </div>
+          <div class="issue-item">
+            <div class="issue-icon" style="background:#ffe0e0; color:#b33;">✗</div>
+            Claude must make dozens of arbitrary assumptions to respond
+          </div>
+        </div>
+      </div>
+      <div class="qcard q-poor">
+        <div class="qcard-head">
+          <div class="qcard-title">Example 2 — Code Task</div>
+          <div class="qcard-badge">Poor</div>
+        </div>
+        <div class="qcard-prompt">Fix my code it's broken.</div>
+        <div class="qcard-issues">
+          <div class="issue-item">
+            <div class="issue-icon" style="background:#ffe0e0; color:#b33;">✗</div>
+            No code provided — Claude has nothing to fix
+          </div>
+          <div class="issue-item">
+            <div class="issue-icon" style="background:#ffe0e0; color:#b33;">✗</div>
+            No language, error message, or expected behavior
+          </div>
+          <div class="issue-item">
+            <div class="issue-icon" style="background:#ffe0e0; color:#b33;">✗</div>
+            Frustration-driven — likely a multi-turn wasted cycle
+          </div>
+        </div>
+      </div>
+      <!-- Score bars -->
+      <div style="grid-column: 1 / -1; padding: 20px; background: rgba(224,67,67,0.04); border: 1px solid rgba(224,67,67,0.15); border-radius: var(--r);">
+        <div style="font-size:13px; font-weight:600; margin-bottom:14px; color:#b33;">Quality Scores</div>
+        <div class="score-row"><span class="score-label">Clarity</span><div class="score-track"><div class="score-fill" style="width:10%; background:#e04343;"></div></div><span class="score-val" style="color:#e04343;">10%</span></div>
+        <div class="score-row"><span class="score-label">Specificity</span><div class="score-track"><div class="score-fill" style="width:5%; background:#e04343;"></div></div><span class="score-val" style="color:#e04343;">5%</span></div>
+        <div class="score-row"><span class="score-label">Actionability</span><div class="score-track"><div class="score-fill" style="width:8%; background:#e04343;"></div></div><span class="score-val" style="color:#e04343;">8%</span></div>
+        <div class="score-row"><span class="score-label">Output Quality</span><div class="score-track"><div class="score-fill" style="width:15%; background:#e04343;"></div></div><span class="score-val" style="color:#e04343;">15%</span></div>
+      </div>
+    </div>
+
+    <!-- AVERAGE -->
+    <div class="quality-panel" id="panel-avg">
+      <div class="qcard q-avg">
+        <div class="qcard-head">
+          <div class="qcard-title">Example 1 — Writing Task</div>
+          <div class="qcard-badge">Average</div>
+        </div>
+        <div class="qcard-prompt">Write a blog post about marketing strategies for small businesses.</div>
+        <div class="qcard-issues">
+          <div class="issue-item">
+            <div class="issue-icon" style="background:#fff3e0; color:#8a5500;">~</div>
+            Has a topic but still too broad — which industry? what stage?
+          </div>
+          <div class="issue-item">
+            <div class="issue-icon" style="background:#fff3e0; color:#8a5500;">~</div>
+            No word count, tone, SEO requirements, or audience persona
+          </div>
+          <div class="issue-item">
+            <div class="issue-icon" style="background:#fff3e0; color:#8a5500;">✓</div>
+            Better than nothing — Claude can produce something usable
+          </div>
+        </div>
+      </div>
+      <div class="qcard q-avg">
+        <div class="qcard-head">
+          <div class="qcard-title">Example 2 — Code Task</div>
+          <div class="qcard-badge">Average</div>
+        </div>
+        <div class="qcard-prompt">Write a Python function to sort a list of dictionaries by a key.</div>
+        <div class="qcard-issues">
+          <div class="issue-item">
+            <div class="issue-icon" style="background:#fff3e0; color:#8a5500;">~</div>
+            Specifies language and task — good start
+          </div>
+          <div class="issue-item">
+            <div class="issue-icon" style="background:#fff3e0; color:#8a5500;">~</div>
+            Missing: ascending/descending, error handling, key types
+          </div>
+          <div class="issue-item">
+            <div class="issue-icon" style="background:#fff3e0; color:#8a5500;">~</div>
+            Will work but may not match actual use case
+          </div>
+        </div>
+      </div>
+      <div style="grid-column: 1 / -1; padding: 20px; background: rgba(242,162,74,0.04); border: 1px solid rgba(242,162,74,0.2); border-radius: var(--r);">
+        <div style="font-size:13px; font-weight:600; margin-bottom:14px; color:#8a5500;">Quality Scores</div>
+        <div class="score-row"><span class="score-label">Clarity</span><div class="score-track"><div class="score-fill" style="width:48%; background:#f2a24a;"></div></div><span class="score-val" style="color:#f2a24a;">48%</span></div>
+        <div class="score-row"><span class="score-label">Specificity</span><div class="score-track"><div class="score-fill" style="width:40%; background:#f2a24a;"></div></div><span class="score-val" style="color:#f2a24a;">40%</span></div>
+        <div class="score-row"><span class="score-label">Actionability</span><div class="score-track"><div class="score-fill" style="width:55%; background:#f2a24a;"></div></div><span class="score-val" style="color:#f2a24a;">55%</span></div>
+        <div class="score-row"><span class="score-label">Output Quality</span><div class="score-track"><div class="score-fill" style="width:50%; background:#f2a24a;"></div></div><span class="score-val" style="color:#f2a24a;">50%</span></div>
+      </div>
+    </div>
+
+    <!-- NICE -->
+    <div class="quality-panel" id="panel-nice">
+      <div class="qcard q-nice">
+        <div class="qcard-head">
+          <div class="qcard-title">Example 1 — Writing Task</div>
+          <div class="qcard-badge">Nice</div>
+        </div>
+        <div class="qcard-prompt">Write a 600-word blog post about email marketing strategies for e-commerce stores. The audience is founders with under 2 years experience. Use a practical, non-jargon tone. Include 3 actionable tips.</div>
+        <div class="qcard-issues">
+          <div class="issue-item">
+            <div class="issue-icon" style="background:#e5eeff; color:#1a4aa0;">✓</div>
+            Specific length, industry, and audience defined
+          </div>
+          <div class="issue-item">
+            <div class="issue-icon" style="background:#e5eeff; color:#1a4aa0;">✓</div>
+            Tone and structure clearly requested
+          </div>
+          <div class="issue-item">
+            <div class="issue-icon" style="background:#e5eeff; color:#1a4aa0;">~</div>
+            Missing: SEO keywords, CTA goal, brand voice notes
+          </div>
+        </div>
+      </div>
+      <div class="qcard q-nice">
+        <div class="qcard-head">
+          <div class="qcard-title">Example 2 — Code Task</div>
+          <div class="qcard-badge">Nice</div>
+        </div>
+        <div class="qcard-prompt">Write a Python function that sorts a list of dicts by a specified key. Support both ascending and descending order. Include error handling for missing keys. Add a docstring.</div>
+        <div class="qcard-issues">
+          <div class="issue-item">
+            <div class="issue-icon" style="background:#e5eeff; color:#1a4aa0;">✓</div>
+            Sort direction, error handling, and docs requested
+          </div>
+          <div class="issue-item">
+            <div class="issue-icon" style="background:#e5eeff; color:#1a4aa0;">✓</div>
+            Will produce production-quality code
+          </div>
+          <div class="issue-item">
+            <div class="issue-icon" style="background:#e5eeff; color:#1a4aa0;">~</div>
+            Could add: Python version, type hints, unit test expectation
+          </div>
+        </div>
+      </div>
+      <div style="grid-column: 1 / -1; padding: 20px; background: rgba(59,111,212,0.04); border: 1px solid rgba(59,111,212,0.18); border-radius: var(--r);">
+        <div style="font-size:13px; font-weight:600; margin-bottom:14px; color:#1a4aa0;">Quality Scores</div>
+        <div class="score-row"><span class="score-label">Clarity</span><div class="score-track"><div class="score-fill" style="width:78%; background:#3b6fd4;"></div></div><span class="score-val" style="color:#3b6fd4;">78%</span></div>
+        <div class="score-row"><span class="score-label">Specificity</span><div class="score-track"><div class="score-fill" style="width:74%; background:#3b6fd4;"></div></div><span class="score-val" style="color:#3b6fd4;">74%</span></div>
+        <div class="score-row"><span class="score-label">Actionability</span><div class="score-track"><div class="score-fill" style="width:82%; background:#3b6fd4;"></div></div><span class="score-val" style="color:#3b6fd4;">82%</span></div>
+        <div class="score-row"><span class="score-label">Output Quality</span><div class="score-track"><div class="score-fill" style="width:80%; background:#3b6fd4;"></div></div><span class="score-val" style="color:#3b6fd4;">80%</span></div>
+      </div>
+    </div>
+
+    <!-- PRECISE -->
+    <div class="quality-panel" id="panel-prec">
+      <div class="qcard q-prec">
+        <div class="qcard-head">
+          <div class="qcard-title">Example 1 — Writing Task</div>
+          <div class="qcard-badge">Precise</div>
+        </div>
+        <div class="qcard-prompt">You are a content strategist for a Shopify email agency.
+
+Write a 600-word blog post about email marketing for DTC e-commerce stores.
+
+Target reader: Founders of fashion/apparel brands, 0–2 years in business, $0–50k MRR.
+
+Tone: Direct, conversational, no jargon. Avoid buzzwords like "leverage" or "synergy".
+
+Structure:
+- Hook (2 sentences)
+- Problem framing (1 paragraph)
+- 3 actionable strategies (subheadings + 80 words each)
+- CTA to book a free audit
+
+Do NOT use statistics you can't verify. Do NOT write a generic intro paragraph.</div>
+        <div class="qcard-issues">
+          <div class="issue-item">
+            <div class="issue-icon" style="background:#d4f4eb; color:#0d5c40;">✓</div>
+            Role, audience persona, tone rules, and forbidden patterns all specified
+          </div>
+          <div class="issue-item">
+            <div class="issue-icon" style="background:#d4f4eb; color:#0d5c40;">✓</div>
+            Exact structure with per-section word counts
+          </div>
+          <div class="issue-item">
+            <div class="issue-icon" style="background:#d4f4eb; color:#0d5c40;">✓</div>
+            Negative constraints eliminate common failure modes
+          </div>
+        </div>
+      </div>
+      <div class="qcard q-prec">
+        <div class="qcard-head">
+          <div class="qcard-title">Example 2 — Code Task</div>
+          <div class="qcard-badge">Precise</div>
+        </div>
+        <div class="qcard-prompt">You are a senior Python engineer. Python 3.11+.
+
+Write a function `sort_dicts(data, key, reverse=False)` that:
+1. Sorts a list of dicts by `key`, ascending by default
+2. Raises KeyError with message "Key '{key}' not found in all items" if any dict lacks the key
+3. Returns an empty list if input is empty (don't raise)
+4. Includes Google-style docstring with Args, Returns, Raises, and Example sections
+5. Uses type hints: `list[dict]` input, `str` key, `bool` reverse, returns `list[dict]`
+
+Do NOT use lambda — use operator.itemgetter for readability.
+Add a `# Example usage:` block at the bottom (not in a test file).</div>
+        <div class="qcard-issues">
+          <div class="issue-item">
+            <div class="issue-icon" style="background:#d4f4eb; color:#0d5c40;">✓</div>
+            Exact function signature, edge cases, and error messages defined
+          </div>
+          <div class="issue-item">
+            <div class="issue-icon" style="background:#d4f4eb; color:#0d5c40;">✓</div>
+            Implementation preferences (no lambda) with reason given
+          </div>
+          <div class="issue-item">
+            <div class="issue-icon" style="background:#d4f4eb; color:#0d5c40;">✓</div>
+            Claude produces exactly this — no interpretation needed
+          </div>
+        </div>
+      </div>
+      <div style="grid-column: 1 / -1; padding: 20px; background: rgba(29,158,117,0.04); border: 1px solid rgba(29,158,117,0.18); border-radius: var(--r);">
+        <div style="font-size:13px; font-weight:600; margin-bottom:14px; color:#0d5c40;">Quality Scores</div>
+        <div class="score-row"><span class="score-label">Clarity</span><div class="score-track"><div class="score-fill" style="width:98%; background:#1d9e75;"></div></div><span class="score-val" style="color:#1d9e75;">98%</span></div>
+        <div class="score-row"><span class="score-label">Specificity</span><div class="score-track"><div class="score-fill" style="width:97%; background:#1d9e75;"></div></div><span class="score-val" style="color:#1d9e75;">97%</span></div>
+        <div class="score-row"><span class="score-label">Actionability</span><div class="score-track"><div class="score-fill" style="width:99%; background:#1d9e75;"></div></div><span class="score-val" style="color:#1d9e75;">99%</span></div>
+        <div class="score-row"><span class="score-label">Output Quality</span><div class="score-track"><div class="score-fill" style="width:97%; background:#1d9e75;"></div></div><span class="score-val" style="color:#97%; background:#1d9e75;">97%</span></div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- ═══ COMPARISON TABLE ═══ -->
+<section class="section">
+  <div class="wrapper">
+    <div class="section-label">Section 04</div>
+    <div class="section-title">At-a-Glance Comparison</div>
+    <p class="section-sub">How the four quality levels differ across key dimensions.</p>
+
+    <div style="overflow-x:auto; border-radius:var(--r); border:1px solid var(--border);">
+      <table class="comp-table">
+        <thead>
+          <tr>
+            <th>Dimension</th>
+            <th style="color:#b33;">Poor</th>
+            <th style="color:#8a5500;">Average</th>
+            <th style="color:#1a4aa0;">Nice</th>
+            <th style="color:#0d5c40;">Precise</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Role defined?</td>
+            <td class="cell-poor">Never</td>
+            <td class="cell-avg">Rarely</td>
+            <td class="cell-nice">Sometimes</td>
+            <td class="cell-prec">Always</td>
+          </tr>
+          <tr>
+            <td>Context provided?</td>
+            <td class="cell-poor">None</td>
+            <td class="cell-avg">Topic only</td>
+            <td class="cell-nice">Task + audience</td>
+            <td class="cell-prec">Full situation + data shape</td>
+          </tr>
+          <tr>
+            <td>Output format</td>
+            <td class="cell-poor">Unspecified</td>
+            <td class="cell-avg">Implied</td>
+            <td class="cell-nice">Named (e.g. "blog post")</td>
+            <td class="cell-prec">Structured with section specs</td>
+          </tr>
+          <tr>
+            <td>Constraints</td>
+            <td class="cell-poor">None</td>
+            <td class="cell-avg">None</td>
+            <td class="cell-nice">A few</td>
+            <td class="cell-prec">Positive + negative constraints</td>
+          </tr>
+          <tr>
+            <td>Ambiguity level</td>
+            <td class="cell-poor">Very high</td>
+            <td class="cell-avg">High</td>
+            <td class="cell-nice">Medium</td>
+            <td class="cell-prec">Minimal</td>
+          </tr>
+          <tr>
+            <td>Revision cycles needed</td>
+            <td class="cell-poor">3–5+</td>
+            <td class="cell-avg">2–3</td>
+            <td class="cell-nice">1–2</td>
+            <td class="cell-prec">0–1</td>
+          </tr>
+          <tr>
+            <td>Output usability</td>
+            <td class="cell-poor">Unusable without heavy edit</td>
+            <td class="cell-avg">Needs refinement</td>
+            <td class="cell-nice">Good, minor tweaks</td>
+            <td class="cell-prec">Production-ready</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- ═══ TEMPLATE ═══ -->
+<section class="section" style="background: var(--bg3);">
+  <div class="wrapper">
+    <div class="section-label">Section 05</div>
+    <div class="section-title">The Universal Prompt Template</div>
+    <p class="section-sub">Copy, fill in the blanks, and adapt to any use case.</p>
+
+    <div class="template-block">
+      <h3>Master Prompt Template</h3>
+      <p class="sub">Fill in only what's relevant — not every field applies to every task.</p>
+      <div class="template-code">
+<span class="tpl-comment"># ── ROLE (optional but powerful) ──────────────────</span>
+<span class="tpl-key">You are a</span> <span class="tpl-val">[expert type, e.g. "senior UX designer"]</span><span class="tpl-key"> with expertise in</span> <span class="tpl-val">[domain]</span>.
+
+<span class="tpl-comment"># ── CONTEXT ───────────────────────────────────────</span>
+<span class="tpl-key">Context:</span> <span class="tpl-val">[Current situation, what you have, what stage you're at, relevant data or background]</span>
+
+<span class="tpl-comment"># ── TASK ──────────────────────────────────────────</span>
+<span class="tpl-key">Task:</span> <span class="tpl-val">[Single, clear action verb + what to produce, e.g. "Write", "Analyze", "Rewrite", "Generate"]</span>
+
+<span class="tpl-comment"># ── FORMAT ────────────────────────────────────────</span>
+<span class="tpl-key">Format:</span> <span class="tpl-val">[Output structure: numbered list / JSON / markdown table / code block / prose / outline]</span>
+<span class="tpl-key">Length:</span> <span class="tpl-val">[Word count / line count / number of items]</span>
+
+<span class="tpl-comment"># ── AUDIENCE ──────────────────────────────────────</span>
+<span class="tpl-key">Audience:</span> <span class="tpl-val">[Who will read/use this? Technical level? Role?]</span>
+<span class="tpl-key">Tone:</span> <span class="tpl-val">[Formal / casual / technical / empathetic / authoritative]</span>
+
+<span class="tpl-comment"># ── CONSTRAINTS ───────────────────────────────────</span>
+<span class="tpl-key">Do:</span>     <span class="tpl-val">[Must-include elements, standards, required keywords]</span>
+<span class="tpl-key">Do NOT:</span> <span class="tpl-val">[Forbidden elements, clichés, assumptions to avoid]</span>
+
+<span class="tpl-comment"># ── EXAMPLES (optional, high impact) ──────────────</span>
+<span class="tpl-key">Example of good output:</span> <span class="tpl-val">[Paste a sample that shows the quality/style you want]</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- ═══ BEST PRACTICES ═══ -->
+<section class="section">
+  <div class="wrapper">
+    <div class="section-label">Section 06</div>
+    <div class="section-title">10 Best Practices</div>
+    <p class="section-sub">Proven techniques that dramatically improve output quality.</p>
+
+    <div class="practices-grid">
+
+      <div class="practice-card">
+        <div class="practice-icon" style="background:rgba(232,83,62,0.1);">🎭</div>
+        <h4>Assign a Role</h4>
+        <p>Start with <code>You are a [expert]</code>. It frames Claude's knowledge activation and writing style from the first token.</p>
+      </div>
+
+      <div class="practice-card">
+        <div class="practice-icon" style="background:rgba(59,111,212,0.1);">🧩</div>
+        <h4>One Task Per Prompt</h4>
+        <p>Avoid "write X, then analyze Y, then suggest Z." Break compound requests into separate prompts for each goal.</p>
+      </div>
+
+      <div class="practice-card">
+        <div class="practice-icon" style="background:rgba(29,158,117,0.1);">📐</div>
+        <h4>Use Positive + Negative Constraints</h4>
+        <p>Tell Claude what TO do AND what NOT to do. <code>Do NOT use bullet points</code> is as powerful as specifying format.</p>
+      </div>
+
+      <div class="practice-card">
+        <div class="practice-icon" style="background:rgba(124,92,191,0.1);">🔢</div>
+        <h4>Request Step-by-Step Reasoning</h4>
+        <p>Add <code>Think step by step</code> or <code>Reason before answering</code> for complex tasks. This activates chain-of-thought internally.</p>
+      </div>
+
+      <div class="practice-card">
+        <div class="practice-icon" style="background:rgba(242,162,74,0.1);">📎</div>
+        <h4>Provide a Sample Output</h4>
+        <p>One concrete example of the style, format, or quality you want is worth 10 adjectives describing it. Show, don't just tell.</p>
+      </div>
+
+      <div class="practice-card">
+        <div class="practice-icon" style="background:rgba(232,83,62,0.1);">🏷️</div>
+        <h4>Use XML Tags for Structure</h4>
+        <p>Wrap distinct sections in tags: <code>&lt;context&gt;</code>, <code>&lt;task&gt;</code>, <code>&lt;format&gt;</code>. Claude parses these cleanly, especially in long prompts.</p>
+      </div>
+
+      <div class="practice-card">
+        <div class="practice-icon" style="background:rgba(59,111,212,0.1);">📏</div>
+        <h4>Specify Exact Length</h4>
+        <p>"Write a summary" is vague. "Write a 3-sentence summary under 80 words" is a directive. Length specificity directly controls verbosity.</p>
+      </div>
+
+      <div class="practice-card">
+        <div class="practice-icon" style="background:rgba(29,158,117,0.1);">🎯</div>
+        <h4>Name Your Audience</h4>
+        <p>"Explain to a 5-year-old" and "Explain to a PhD student" produce radically different outputs from identical tasks. Audience is a force multiplier.</p>
+      </div>
+
+      <div class="practice-card">
+        <div class="practice-icon" style="background:rgba(124,92,191,0.1);">🔄</div>
+        <h4>Iterate, Don't Restart</h4>
+        <p>Use follow-up prompts like <code>Revise section 2 to be more concise</code> rather than rewriting the whole prompt. Claude holds conversation context.</p>
+      </div>
+
+      <div class="practice-card">
+        <div class="practice-icon" style="background:rgba(242,162,74,0.1);">⚠️</div>
+        <h4>State the Failure Mode</h4>
+        <p>Tell Claude what a bad response looks like: <code>If you're uncertain, say so rather than guessing</code>. This sets quality expectations explicitly.</p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- ═══ CHEAT SHEET ═══ -->
+<section class="section" style="background:var(--bg3);">
+  <div class="wrapper">
+    <div class="section-label">Section 07</div>
+    <div class="section-title">Quick Reference Cheat Sheet</div>
+    <p class="section-sub">Power phrases and patterns that reliably improve prompt performance.</p>
+
+    <div class="cheat-grid">
+      <div class="cheat-card">
+        <div class="cheat-head">
+          <div class="cheat-head-dot" style="background:var(--accent);"></div>
+          Tone & Style
+        </div>
+        <div class="cheat-list">
+          <div class="cheat-item">Write in a direct, conversational tone — no corporate jargon</div>
+          <div class="cheat-item">Use active voice throughout</div>
+          <div class="cheat-item">Avoid adverbs like "very", "extremely", "really"</div>
+          <div class="cheat-item">Sound like [specific person or brand] — not like AI</div>
+          <div class="cheat-item">Match the energy of the audience: [describe them]</div>
+        </div>
+      </div>
+      <div class="cheat-card">
+        <div class="cheat-head">
+          <div class="cheat-head-dot" style="background:var(--blue);"></div>
+          Output Format
+        </div>
+        <div class="cheat-list">
+          <div class="cheat-item">Respond only in JSON with keys: [list them]</div>
+          <div class="cheat-item">Use markdown with H2 headers and bullet points</div>
+          <div class="cheat-item">Output as a numbered list with max 1 sentence per item</div>
+          <div class="cheat-item">Start with a 1-line summary, then details below</div>
+          <div class="cheat-item">Return only the code — no explanation unless asked</div>
+        </div>
+      </div>
+      <div class="cheat-card">
+        <div class="cheat-head">
+          <div class="cheat-head-dot" style="background:var(--teal);"></div>
+          Reasoning Triggers
+        </div>
+        <div class="cheat-list">
+          <div class="cheat-item">Think step by step before answering</div>
+          <div class="cheat-item">First identify what information is missing</div>
+          <div class="cheat-item">Before responding, restate the problem in your own words</div>
+          <div class="cheat-item">Consider edge cases and mention any assumptions</div>
+          <div class="cheat-item">If there are multiple valid approaches, list them first</div>
+        </div>
+      </div>
+      <div class="cheat-card">
+        <div class="cheat-head">
+          <div class="cheat-head-dot" style="background:var(--purple);"></div>
+          Guardrails & Quality
+        </div>
+        <div class="cheat-list">
+          <div class="cheat-item">Do NOT start with "Certainly!", "Great question!", or filler phrases</div>
+          <div class="cheat-item">If unsure, say "I'm not certain" rather than guessing</div>
+          <div class="cheat-item">Do NOT pad the response with obvious context I already know</div>
+          <div class="cheat-item">After responding, rate your own confidence (1–5) with a reason</div>
+          <div class="cheat-item">Cite any statistics you include — do not invent numbers</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ FOOTER ═══ -->
+<footer class="footer">
+  <strong>Claude Prompt Engineering Guide</strong> · Built as a reference for AI Specialists and developers working with Claude<br>
+  Anthropic Claude Sonnet 4.6 · Prompt engineering best practices · 2025
+</footer>
+
+<script>
+  function switchTab(id, btn) {
+    document.querySelectorAll('.quality-panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.qtab').forEach(b => b.classList.remove('active'));
+    document.getElementById('panel-' + id).classList.add('active');
+    btn.classList.add('active');
+  }
+</script>
+</body>
+</html>

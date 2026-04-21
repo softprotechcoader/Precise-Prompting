@@ -1,0 +1,101 @@
+# ================================================================
+# deploy.yml  —  GitHub Actions CI/CD Pipeline
+# ================================================================
+# What this does:
+#   Every time code is pushed to the "main" branch, this workflow
+#   automatically deploys the site to GitHub Pages.
+#
+# How GitHub Pages works:
+#   GitHub hosts static files (HTML, CSS, JS) for free on a URL like:
+#   https://YOUR_USERNAME.github.io/YOUR_REPO_NAME/
+#
+# Setup (do this once before the workflow will work):
+#   1. Push this repo to GitHub
+#   2. Go to repo Settings → Pages
+#   3. Under "Source", select "GitHub Actions"
+#   4. Save — then push any change to main to trigger deployment
+#
+# Pipeline stages:
+#   Push to main → Checkout code → Configure Pages →
+#   Upload artifact → Deploy to Pages CDN → Live URL updated
+# ================================================================
+
+name: Deploy to GitHub Pages
+
+# ── TRIGGER ─────────────────────────────────────────────────────
+# Run this workflow when there's a push to the main branch.
+# You can add more branches here if needed (e.g. "production").
+on:
+  push:
+    branches:
+      - main
+
+  # Also allow manually triggering from the GitHub Actions tab
+  workflow_dispatch:
+
+# ── PERMISSIONS ─────────────────────────────────────────────────
+# These are the minimum permissions the workflow needs.
+# contents:read  — to check out the repo
+# pages:write    — to upload files to GitHub Pages
+# id-token:write — for OIDC authentication (required by deploy-pages)
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# ── CONCURRENCY ─────────────────────────────────────────────────
+# Prevents two deployments from running at the same time.
+# If a new push happens while a deploy is in progress,
+# the in-progress deploy is NOT cancelled (cancel-in-progress: false)
+# so the live site never gets a partially-deployed update.
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+# ── JOBS ────────────────────────────────────────────────────────
+jobs:
+
+  # ── Job: deploy ─────────────────────────────────────────────
+  # This single job handles the full deploy process.
+  # It runs on GitHub's hosted Ubuntu runner (free tier).
+  deploy:
+
+    # This links the job to the "github-pages" environment.
+    # GitHub Pages requires this environment declaration.
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}  # shows live URL in Actions log
+
+    runs-on: ubuntu-latest
+
+    steps:
+
+      # ── Step 1: Checkout the code ──────────────────────────
+      # This clones your repo into the runner's workspace.
+      # uses: actions/checkout@v4 is the official GitHub action.
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # ── Step 2: Configure GitHub Pages ─────────────────────
+      # Prepares the runner environment for a Pages deployment.
+      # Sets metadata like the base URL for the site.
+      - name: Setup GitHub Pages
+        uses: actions/configure-pages@v5
+
+      # ── Step 3: Upload the site as an artifact ─────────────
+      # Bundles the files in the repo root into a Pages artifact.
+      # path: '.' means "upload everything from the repo root".
+      # If you want to deploy only a subfolder (e.g. /dist),
+      # change path to: path: './dist'
+      - name: Upload site artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: '.'   # upload entire repo root (index.html, styles.css, scripts.js)
+
+      # ── Step 4: Deploy to GitHub Pages ─────────────────────
+      # Takes the uploaded artifact and publishes it to Pages CDN.
+      # The id: deployment line lets us capture the output URL
+      # (used in the environment.url field above).
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

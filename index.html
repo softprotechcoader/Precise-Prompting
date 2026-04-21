@@ -1,0 +1,1324 @@
+<!DOCTYPE html>
+<!--
+  index.html  —  The Art of Precise Prompting
+  ─────────────────────────────────────────────
+  A complete visual guide to prompt engineering for Claude AI.
+
+  Structure (9 sections):
+    01  Anatomy of an Ideal Prompt      (color-coded example + mindmap)
+    02  How Claude Processes Your Prompt (7-stage flow + Mermaid flowchart)
+    03  The Quality Spectrum             (tabbed Poor → Precise examples)
+    04  At-a-Glance Comparison           (table view)
+    05  The Universal Prompt Template    (fill-in-the-blanks template)
+    06  10 Best Practices                (filterable cards)
+    07  Quick Reference Cheat Sheet      (power phrases)
+    08  Interactive Prompt Builder       (live form → assembled prompt)  ✨ NEW
+    09  Common Mistakes & Fixes          (FAQ accordion)                 ✨ NEW
+
+  External dependencies:
+    styles.css   — all visual styles
+    scripts.js   — all interactive behavior
+    Mermaid CDN  — diagram rendering (flowcharts, mindmaps)
+    Google Fonts — DM Sans, DM Mono, Playfair Display
+-->
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="A complete visual guide to crafting prompts that get exactly what you need from Claude AI — anatomy, processing, quality spectrum, and an interactive prompt builder.">
+  <meta name="theme-color" content="#1a1a2e">
+
+  <!-- Open Graph (social share preview) -->
+  <meta property="og:title" content="The Art of Precise Prompting — Claude AI">
+  <meta property="og:description" content="Master prompt engineering with visual guides, interactive examples, and a live prompt builder.">
+  <meta property="og:type" content="website">
+
+  <title>The Art of Precise Prompting — Claude AI</title>
+
+  <!-- Google Fonts
+       DM Sans    = clean, friendly body text
+       DM Mono    = monospace for code and technical labels
+       Playfair Display = elegant serif for section headings -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet">
+
+  <!-- Mermaid — converts text inside <pre class="mermaid"> into SVG diagrams
+       v10 is the latest stable release as of 2025. -->
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10.9.0/dist/mermaid.min.js"></script>
+
+  <!-- Our stylesheet -->
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     NAVIGATION BAR
+     Sticky bar that stays at the top while scrolling.
+     data-section on each link is used by the scroll-spy in scripts.js.
+     ═══════════════════════════════════════════════════════════════ -->
+<nav class="nav" role="navigation" aria-label="Main navigation">
+  <div class="nav-inner">
+
+    <!-- Brand -->
+    <div class="nav-brand">
+      <span class="nav-brand-dot" aria-hidden="true"></span>
+      Precise Prompting
+    </div>
+
+    <!-- Section links — clicking calls scrollToSection(id) -->
+    <div class="nav-links" role="list">
+      <button class="nav-link active" data-section="anatomy"   onclick="scrollToSection('anatomy')">Anatomy</button>
+      <button class="nav-link"        data-section="processing" onclick="scrollToSection('processing')">Processing</button>
+      <button class="nav-link"        data-section="quality"    onclick="scrollToSection('quality')">Quality</button>
+      <button class="nav-link"        data-section="compare"    onclick="scrollToSection('compare')">Compare</button>
+      <button class="nav-link"        data-section="template"   onclick="scrollToSection('template')">Template</button>
+      <button class="nav-link"        data-section="practices"  onclick="scrollToSection('practices')">Practices</button>
+      <button class="nav-link"        data-section="cheatsheet" onclick="scrollToSection('cheatsheet')">Cheat Sheet</button>
+      <button class="nav-link"        data-section="builder"    onclick="scrollToSection('builder')">Builder</button>
+      <button class="nav-link"        data-section="mistakes"   onclick="scrollToSection('mistakes')">Mistakes</button>
+    </div>
+
+    <!-- Dark mode toggle — icon is updated by scripts.js -->
+    <div class="nav-controls">
+      <button
+        id="themeBtn"
+        class="theme-btn"
+        onclick="toggleDarkMode()"
+        aria-label="Toggle dark mode"
+        title="Toggle dark / light mode">
+        🌙
+      </button>
+    </div>
+
+  </div>
+</nav>
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     HERO
+     ═══════════════════════════════════════════════════════════════ -->
+<header class="hero" role="banner">
+  <div class="hero-grid">
+
+    <!-- Left: headline + tagline + CTA -->
+    <div>
+      <div class="hero-tag" aria-label="Category">AI Prompt Engineering</div>
+
+      <h1>The Art of <span>Precise</span> Prompting</h1>
+
+      <p>
+        A complete visual guide to crafting prompts that get exactly what you need
+        from Claude — from anatomy to processing to real-world examples, plus
+        an interactive prompt builder you can use right now.
+      </p>
+
+      <!-- CTA scrolls down to the first section -->
+      <button class="hero-btn" onclick="scrollToSection('anatomy')" aria-label="Start reading">
+        Start Learning ↓
+      </button>
+    </div>
+
+    <!-- Right: stats summary pills -->
+    <div class="hero-stats" aria-label="Guide stats">
+
+      <div class="stat-pill">
+        <div class="stat-icon" style="background:rgba(232,83,62,0.2);" aria-hidden="true">🎯</div>
+        <div>
+          <div class="stat-label">5 Prompt Components</div>
+          <div class="stat-val">Role · Context · Task · Format · Constraints</div>
+        </div>
+      </div>
+
+      <div class="stat-pill">
+        <div class="stat-icon" style="background:rgba(59,111,212,0.2);" aria-hidden="true">⚙️</div>
+        <div>
+          <div class="stat-label">7 Processing Stages</div>
+          <div class="stat-val">How Claude decodes your intent</div>
+        </div>
+      </div>
+
+      <div class="stat-pill">
+        <div class="stat-icon" style="background:rgba(29,158,117,0.2);" aria-hidden="true">📊</div>
+        <div>
+          <div class="stat-label">4 Quality Levels</div>
+          <div class="stat-val">Poor → Average → Nice → Precise</div>
+        </div>
+      </div>
+
+      <div class="stat-pill">
+        <div class="stat-icon" style="background:rgba(124,92,191,0.2);" aria-hidden="true">🔨</div>
+        <div>
+          <div class="stat-label">Live Prompt Builder</div>
+          <div class="stat-val">Fill in fields → copy a ready-to-use prompt</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</header>
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     SECTION 01 — ANATOMY OF AN IDEAL PROMPT
+     Shows a real color-labeled example + a Mermaid mindmap
+     ═══════════════════════════════════════════════════════════════ -->
+<section id="anatomy" class="section" style="background: var(--bg3);" aria-labelledby="anatomy-title">
+  <div class="wrapper">
+
+    <div class="section-label">Section 01</div>
+    <h2 class="section-title" id="anatomy-title">Anatomy of an Ideal Prompt</h2>
+    <p class="section-sub">
+      Every great prompt is built from five foundational components.
+      Miss one and you leave Claude guessing — and guessing costs you revision cycles.
+    </p>
+
+    <!-- Color-coded example prompt with labeled components -->
+    <div class="anatomy-wrap fade-in" role="figure" aria-label="Annotated example prompt">
+
+      <!-- The example prompt text with inline color labels -->
+      <div class="anatomy-prompt" aria-label="Example prompt">
+        <div style="margin-bottom:14px;">
+          <span class="label lbl-role">ROLE</span>
+          <span style="color:#ff8a75;">You are a senior Python developer specializing in data pipelines.</span>
+        </div>
+        <div style="margin-bottom:14px;">
+          <span class="label lbl-ctx">CONTEXT</span>
+          <span style="color:#82a8ff;">I have a CSV file with 500k rows. Columns: user_id, event_type, timestamp, value. The pipeline currently takes 45 minutes to run.</span>
+        </div>
+        <div style="margin-bottom:14px;">
+          <span class="label lbl-task">TASK</span>
+          <span style="color:#5dd8b0;">Rewrite the processing function to use pandas vectorized operations instead of row-by-row iteration. Focus on the aggregate step.</span>
+        </div>
+        <div style="margin-bottom:14px;">
+          <span class="label lbl-fmt">FORMAT</span>
+          <span style="color:#ffd08a;">Provide: (1) the refactored function, (2) a before/after comparison, (3) expected speedup estimate.</span>
+        </div>
+        <div>
+          <span class="label lbl-const">CONSTRAINTS</span>
+          <span style="color:#c4aaff;">Use only pandas and numpy. Python 3.10+. No external dependencies. Preserve the existing function signature.</span>
+        </div>
+      </div>
+
+      <!-- Five-column explainer grid -->
+      <div class="anatomy-parts" role="list">
+        <div class="anatomy-part" style="border-top:3px solid #e8533e;" role="listitem">
+          <div class="part-dot" style="background:#e8533e;"></div>
+          <h4>Role</h4>
+          <p>Sets Claude's persona, expertise level, and behavioral frame for the entire response.</p>
+        </div>
+        <div class="anatomy-part" style="border-top:3px solid #3b6fd4;" role="listitem">
+          <div class="part-dot" style="background:#3b6fd4;"></div>
+          <h4>Context</h4>
+          <p>The background, current state, data shape, or situation Claude needs to understand your problem.</p>
+        </div>
+        <div class="anatomy-part" style="border-top:3px solid #1d9e75;" role="listitem">
+          <div class="part-dot" style="background:#1d9e75;"></div>
+          <h4>Task</h4>
+          <p>The explicit, specific action you want. Use strong verbs: rewrite, analyze, compare, generate.</p>
+        </div>
+        <div class="anatomy-part" style="border-top:3px solid #f2a24a;" role="listitem">
+          <div class="part-dot" style="background:#f2a24a;"></div>
+          <h4>Format</h4>
+          <p>Desired output structure — numbered list, code block, table, JSON, essay, bullet points.</p>
+        </div>
+        <div class="anatomy-part" style="border-top:3px solid #7c5cbf;" role="listitem">
+          <div class="part-dot" style="background:#7c5cbf;"></div>
+          <h4>Constraints</h4>
+          <p>Boundaries, limitations, must-haves and must-avoids that stop incorrect assumptions.</p>
+        </div>
+      </div>
+
+    </div><!-- /anatomy-wrap -->
+
+    <!-- Mermaid Mindmap — visual overview of the 5 components
+         Mermaid renders the <pre class="mermaid"> block into SVG -->
+    <div class="diagram-grid fade-in">
+
+      <div class="mermaid-wrap">
+        <div class="diagram-label">Prompt Component Mindmap</div>
+        <pre class="mermaid">
+mindmap
+  root((Ideal Prompt))
+    Role
+      Expert persona
+      Knowledge frame
+      Tone setter
+    Context
+      Background info
+      Current state
+      Data shape
+    Task
+      Action verb
+      Clear deliverable
+      Specific goal
+    Format
+      Structure type
+      Length target
+      Style guide
+    Constraints
+      Must-do rules
+      Must-avoid rules
+      Edge cases
+        </pre>
+      </div>
+
+      <!-- Quick-reference anatomy table as a second diagram -->
+      <div class="mermaid-wrap">
+        <div class="diagram-label">Component Impact on Output Quality</div>
+        <pre class="mermaid">
+%%{init: {'theme': 'base'}}%%
+xychart-beta
+  title "Impact of Each Component"
+  x-axis ["Role", "Context", "Task", "Format", "Constraints"]
+  y-axis "Quality Impact (%)" 0 --> 100
+  bar [75, 85, 95, 70, 80]
+        </pre>
+      </div>
+
+    </div>
+
+  </div>
+</section>
+
+<hr class="divider">
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     SECTION 02 — HOW CLAUDE PROCESSES YOUR PROMPT
+     7 processing stages shown as cards + a Mermaid flowchart
+     ═══════════════════════════════════════════════════════════════ -->
+<section id="processing" class="section" aria-labelledby="processing-title">
+  <div class="wrapper">
+
+    <div class="section-label">Section 02</div>
+    <h2 class="section-title" id="processing-title">How Claude Processes Your Prompt</h2>
+    <p class="section-sub">
+      Behind every response is a multi-stage internal process. Understanding it helps
+      you write prompts that align with how the model actually thinks.
+    </p>
+
+    <!-- Mermaid Flowchart showing the 7 stages -->
+    <div class="mermaid-wrap fade-in" style="margin-bottom:40px;">
+      <div class="diagram-label">Claude's Internal Processing Pipeline</div>
+      <pre class="mermaid">
+flowchart LR
+  A([📝 Your Prompt]) --> B[🔢 Tokenization]
+  B --> C[🎯 Intent Parsing]
+  C --> D[⚖️ Context Weighting]
+  D --> E[📚 Knowledge Retrieval]
+  E --> F[🧠 Chain-of-Thought]
+  F --> G[🔧 Format Assembly]
+  G --> H([💬 Response])
+
+  style A fill:#1a1a2e,color:#fff,stroke:#e8533e
+  style H fill:#1d9e75,color:#fff,stroke:#1d9e75
+      </pre>
+    </div>
+
+    <!-- Seven step cards (horizontal scroll) -->
+    <div class="flow-container" role="list" aria-label="Processing stages">
+
+      <div class="flow-step fade-in" role="listitem">
+        <div class="flow-card">
+          <div class="flow-num" style="background:rgba(232,83,62,0.12); color:var(--accent);">01</div>
+          <h4>Tokenization</h4>
+          <p>Your prompt is split into tokens (roughly word-pieces). Context window limits total tokens in + out.</p>
+          <span class="flow-tag" style="background:rgba(232,83,62,0.1); color:var(--accent);">~milliseconds</span>
+        </div>
+      </div>
+
+      <div class="flow-step fade-in" role="listitem" style="transition-delay:0.05s">
+        <div class="flow-card">
+          <div class="flow-num" style="background:rgba(59,111,212,0.12); color:var(--blue);">02</div>
+          <h4>Intent Parsing</h4>
+          <p>Claude identifies the core request type: question, generation, transformation, analysis, or conversation.</p>
+          <span class="flow-tag" style="background:rgba(59,111,212,0.1); color:var(--blue);">semantic layer</span>
+        </div>
+      </div>
+
+      <div class="flow-step fade-in" role="listitem" style="transition-delay:0.1s">
+        <div class="flow-card">
+          <div class="flow-num" style="background:rgba(124,92,191,0.12); color:var(--purple);">03</div>
+          <h4>Context Weighting</h4>
+          <p>Attention mechanisms assign weight to different parts of your prompt. Specific details get higher weight.</p>
+          <span class="flow-tag" style="background:rgba(124,92,191,0.1); color:var(--purple);">attention</span>
+        </div>
+      </div>
+
+      <div class="flow-step fade-in" role="listitem" style="transition-delay:0.15s">
+        <div class="flow-card">
+          <div class="flow-num" style="background:rgba(242,162,74,0.12); color:var(--accent2);">04</div>
+          <h4>Knowledge Retrieval</h4>
+          <p>Relevant training knowledge is activated and weighted against your specific context and constraints.</p>
+          <span class="flow-tag" style="background:rgba(242,162,74,0.1); color:var(--accent2);">parametric memory</span>
+        </div>
+      </div>
+
+      <div class="flow-step fade-in" role="listitem" style="transition-delay:0.2s">
+        <div class="flow-card">
+          <div class="flow-num" style="background:rgba(29,158,117,0.12); color:var(--teal);">05</div>
+          <h4>Chain-of-Thought</h4>
+          <p>For complex tasks, internal reasoning steps are generated — especially when you say "think step by step".</p>
+          <span class="flow-tag" style="background:rgba(29,158,117,0.1); color:var(--teal);">reasoning</span>
+        </div>
+      </div>
+
+      <div class="flow-step fade-in" role="listitem" style="transition-delay:0.25s">
+        <div class="flow-card">
+          <div class="flow-num" style="background:rgba(232,83,62,0.12); color:var(--accent);">06</div>
+          <h4>Format Assembly</h4>
+          <p>The response is structured according to detected format signals: code blocks, headers, lists, or prose.</p>
+          <span class="flow-tag" style="background:rgba(232,83,62,0.1); color:var(--accent);">output structure</span>
+        </div>
+      </div>
+
+      <div class="flow-step fade-in" role="listitem" style="transition-delay:0.3s">
+        <div class="flow-card">
+          <div class="flow-num" style="background:rgba(59,111,212,0.12); color:var(--blue);">07</div>
+          <h4>Token Generation</h4>
+          <p>Output tokens are generated autoregressively — each word influences the next. Precision in = precision out.</p>
+          <span class="flow-tag" style="background:rgba(59,111,212,0.1); color:var(--blue);">autoregressive</span>
+        </div>
+      </div>
+
+    </div><!-- /flow-container -->
+
+    <!-- Key insight callout -->
+    <div class="callout fade-in" role="note">
+      <div class="icon" aria-hidden="true">💡</div>
+      <div>
+        <div class="title">Why this matters for prompting</div>
+        <p>
+          Claude doesn't "understand" your prompt the way a human would — it computes probability
+          distributions over tokens. This means <strong style="color:var(--ink);">ambiguous prompts produce unpredictable outputs</strong>.
+          Every specific detail you provide narrows the distribution toward your intended answer.
+          Structure signals (like "respond in JSON" or "step by step") directly influence the
+          Format Assembly stage and lock in the shape of the response.
+        </p>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<hr class="divider">
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     SECTION 03 — THE QUALITY SPECTRUM
+     Four tabbed panels: Poor / Average / Nice / Precise
+     Each tab shows two example prompts (Writing + Code)
+     ═══════════════════════════════════════════════════════════════ -->
+<section id="quality" class="section" style="background:var(--bg3);" aria-labelledby="quality-title">
+  <div class="wrapper">
+
+    <div class="section-label">Section 03</div>
+    <h2 class="section-title" id="quality-title">The Quality Spectrum</h2>
+    <p class="section-sub">
+      Same task, four levels of prompt quality. See how adding specificity
+      transforms what Claude can deliver.
+    </p>
+
+    <!-- Tab buttons — onclick calls switchTab() in scripts.js -->
+    <div class="quality-tabs" role="tablist" aria-label="Quality levels">
+      <button class="qtab active" role="tab" aria-selected="true"  aria-controls="panel-poor" onclick="switchTab('poor',this)">
+        <span class="dot" style="background:#e04343;" aria-hidden="true"></span> Poor
+      </button>
+      <button class="qtab"        role="tab" aria-selected="false" aria-controls="panel-avg"  onclick="switchTab('avg',this)">
+        <span class="dot" style="background:#f2a24a;" aria-hidden="true"></span> Average
+      </button>
+      <button class="qtab"        role="tab" aria-selected="false" aria-controls="panel-nice" onclick="switchTab('nice',this)">
+        <span class="dot" style="background:#3b6fd4;" aria-hidden="true"></span> Nice
+      </button>
+      <button class="qtab"        role="tab" aria-selected="false" aria-controls="panel-prec" onclick="switchTab('prec',this)">
+        <span class="dot" style="background:#1d9e75;" aria-hidden="true"></span> Precise
+      </button>
+    </div>
+
+    <!-- ── POOR ── -->
+    <div class="quality-panel active" id="panel-poor" role="tabpanel">
+
+      <div class="qcard q-poor">
+        <div class="qcard-head">
+          <div class="qcard-title">Example 1 — Writing Task</div>
+          <div class="qcard-badge">Poor</div>
+        </div>
+        <div class="qcard-prompt copyable">Write something about marketing.</div>
+        <div class="qcard-issues">
+          <div class="issue-item"><div class="issue-icon" style="background:#ffe0e0;color:#b33;">✗</div>No audience, product, goal, tone, or format specified</div>
+          <div class="issue-item"><div class="issue-icon" style="background:#ffe0e0;color:#b33;">✗</div>"Something" gives zero directional signal</div>
+          <div class="issue-item"><div class="issue-icon" style="background:#ffe0e0;color:#b33;">✗</div>Claude must make dozens of arbitrary assumptions</div>
+        </div>
+      </div>
+
+      <div class="qcard q-poor">
+        <div class="qcard-head">
+          <div class="qcard-title">Example 2 — Code Task</div>
+          <div class="qcard-badge">Poor</div>
+        </div>
+        <div class="qcard-prompt copyable">Fix my code it's broken.</div>
+        <div class="qcard-issues">
+          <div class="issue-item"><div class="issue-icon" style="background:#ffe0e0;color:#b33;">✗</div>No code provided — Claude has nothing to fix</div>
+          <div class="issue-item"><div class="issue-icon" style="background:#ffe0e0;color:#b33;">✗</div>No language, error message, or expected behavior given</div>
+          <div class="issue-item"><div class="issue-icon" style="background:#ffe0e0;color:#b33;">✗</div>Frustration-driven — likely a multi-turn wasted cycle</div>
+        </div>
+      </div>
+
+      <!-- Score bars — data-width drives the animation in scripts.js -->
+      <div class="score-section" style="background:rgba(224,67,67,0.04);border:1px solid rgba(224,67,67,0.15);">
+        <div style="font-size:13px;font-weight:600;margin-bottom:14px;color:#b33;">Quality Scores</div>
+        <div class="score-row"><span class="score-label">Clarity</span>      <div class="score-track"><div class="score-fill" data-width="10%"  style="background:#e04343;"></div></div><span class="score-val" style="color:#e04343;">10%</span></div>
+        <div class="score-row"><span class="score-label">Specificity</span>  <div class="score-track"><div class="score-fill" data-width="5%"   style="background:#e04343;"></div></div><span class="score-val" style="color:#e04343;">5%</span></div>
+        <div class="score-row"><span class="score-label">Actionability</span><div class="score-track"><div class="score-fill" data-width="8%"   style="background:#e04343;"></div></div><span class="score-val" style="color:#e04343;">8%</span></div>
+        <div class="score-row"><span class="score-label">Output Quality</span><div class="score-track"><div class="score-fill" data-width="15%"  style="background:#e04343;"></div></div><span class="score-val" style="color:#e04343;">15%</span></div>
+      </div>
+    </div>
+
+    <!-- ── AVERAGE ── -->
+    <div class="quality-panel" id="panel-avg" role="tabpanel">
+
+      <div class="qcard q-avg">
+        <div class="qcard-head">
+          <div class="qcard-title">Example 1 — Writing Task</div>
+          <div class="qcard-badge">Average</div>
+        </div>
+        <div class="qcard-prompt copyable">Write a blog post about marketing strategies for small businesses.</div>
+        <div class="qcard-issues">
+          <div class="issue-item"><div class="issue-icon" style="background:#fff3e0;color:#8a5500;">~</div>Has a topic but still too broad — which industry? what stage?</div>
+          <div class="issue-item"><div class="issue-icon" style="background:#fff3e0;color:#8a5500;">~</div>No word count, tone, SEO requirements, or audience persona</div>
+          <div class="issue-item"><div class="issue-icon" style="background:#fff3e0;color:#8a5500;">✓</div>Better than nothing — Claude can produce something usable</div>
+        </div>
+      </div>
+
+      <div class="qcard q-avg">
+        <div class="qcard-head">
+          <div class="qcard-title">Example 2 — Code Task</div>
+          <div class="qcard-badge">Average</div>
+        </div>
+        <div class="qcard-prompt copyable">Write a Python function to sort a list of dictionaries by a key.</div>
+        <div class="qcard-issues">
+          <div class="issue-item"><div class="issue-icon" style="background:#fff3e0;color:#8a5500;">~</div>Specifies language and task — good start</div>
+          <div class="issue-item"><div class="issue-icon" style="background:#fff3e0;color:#8a5500;">~</div>Missing: ascending/descending, error handling, key types</div>
+          <div class="issue-item"><div class="issue-icon" style="background:#fff3e0;color:#8a5500;">~</div>Will work but may not match actual use case</div>
+        </div>
+      </div>
+
+      <div class="score-section" style="background:rgba(242,162,74,0.04);border:1px solid rgba(242,162,74,0.2);">
+        <div style="font-size:13px;font-weight:600;margin-bottom:14px;color:#8a5500;">Quality Scores</div>
+        <div class="score-row"><span class="score-label">Clarity</span>      <div class="score-track"><div class="score-fill" data-width="48%" style="background:#f2a24a;"></div></div><span class="score-val" style="color:#f2a24a;">48%</span></div>
+        <div class="score-row"><span class="score-label">Specificity</span>  <div class="score-track"><div class="score-fill" data-width="40%" style="background:#f2a24a;"></div></div><span class="score-val" style="color:#f2a24a;">40%</span></div>
+        <div class="score-row"><span class="score-label">Actionability</span><div class="score-track"><div class="score-fill" data-width="55%" style="background:#f2a24a;"></div></div><span class="score-val" style="color:#f2a24a;">55%</span></div>
+        <div class="score-row"><span class="score-label">Output Quality</span><div class="score-track"><div class="score-fill" data-width="50%" style="background:#f2a24a;"></div></div><span class="score-val" style="color:#f2a24a;">50%</span></div>
+      </div>
+    </div>
+
+    <!-- ── NICE ── -->
+    <div class="quality-panel" id="panel-nice" role="tabpanel">
+
+      <div class="qcard q-nice">
+        <div class="qcard-head">
+          <div class="qcard-title">Example 1 — Writing Task</div>
+          <div class="qcard-badge">Nice</div>
+        </div>
+        <div class="qcard-prompt copyable">Write a 600-word blog post about email marketing strategies for e-commerce stores. The audience is founders with under 2 years experience. Use a practical, non-jargon tone. Include 3 actionable tips.</div>
+        <div class="qcard-issues">
+          <div class="issue-item"><div class="issue-icon" style="background:#e5eeff;color:#1a4aa0;">✓</div>Specific length, industry, and audience defined</div>
+          <div class="issue-item"><div class="issue-icon" style="background:#e5eeff;color:#1a4aa0;">✓</div>Tone and structure clearly requested</div>
+          <div class="issue-item"><div class="issue-icon" style="background:#e5eeff;color:#1a4aa0;">~</div>Missing: SEO keywords, CTA goal, brand voice notes</div>
+        </div>
+      </div>
+
+      <div class="qcard q-nice">
+        <div class="qcard-head">
+          <div class="qcard-title">Example 2 — Code Task</div>
+          <div class="qcard-badge">Nice</div>
+        </div>
+        <div class="qcard-prompt copyable">Write a Python function that sorts a list of dicts by a specified key. Support both ascending and descending order. Include error handling for missing keys. Add a docstring.</div>
+        <div class="qcard-issues">
+          <div class="issue-item"><div class="issue-icon" style="background:#e5eeff;color:#1a4aa0;">✓</div>Sort direction, error handling, and docs requested</div>
+          <div class="issue-item"><div class="issue-icon" style="background:#e5eeff;color:#1a4aa0;">✓</div>Will produce production-quality code</div>
+          <div class="issue-item"><div class="issue-icon" style="background:#e5eeff;color:#1a4aa0;">~</div>Could add: Python version, type hints, unit test expectation</div>
+        </div>
+      </div>
+
+      <div class="score-section" style="background:rgba(59,111,212,0.04);border:1px solid rgba(59,111,212,0.18);">
+        <div style="font-size:13px;font-weight:600;margin-bottom:14px;color:#1a4aa0;">Quality Scores</div>
+        <div class="score-row"><span class="score-label">Clarity</span>      <div class="score-track"><div class="score-fill" data-width="78%" style="background:#3b6fd4;"></div></div><span class="score-val" style="color:#3b6fd4;">78%</span></div>
+        <div class="score-row"><span class="score-label">Specificity</span>  <div class="score-track"><div class="score-fill" data-width="74%" style="background:#3b6fd4;"></div></div><span class="score-val" style="color:#3b6fd4;">74%</span></div>
+        <div class="score-row"><span class="score-label">Actionability</span><div class="score-track"><div class="score-fill" data-width="82%" style="background:#3b6fd4;"></div></div><span class="score-val" style="color:#3b6fd4;">82%</span></div>
+        <div class="score-row"><span class="score-label">Output Quality</span><div class="score-track"><div class="score-fill" data-width="80%" style="background:#3b6fd4;"></div></div><span class="score-val" style="color:#3b6fd4;">80%</span></div>
+      </div>
+    </div>
+
+    <!-- ── PRECISE ── -->
+    <div class="quality-panel" id="panel-prec" role="tabpanel">
+
+      <div class="qcard q-prec">
+        <div class="qcard-head">
+          <div class="qcard-title">Example 1 — Writing Task</div>
+          <div class="qcard-badge">Precise</div>
+        </div>
+        <div class="qcard-prompt copyable">You are a content strategist for a Shopify email agency.
+
+Write a 600-word blog post about email marketing for DTC e-commerce stores.
+
+Target reader: Founders of fashion/apparel brands, 0–2 years in business, $0–50k MRR.
+
+Tone: Direct, conversational, no jargon. Avoid buzzwords like "leverage" or "synergy".
+
+Structure:
+- Hook (2 sentences)
+- Problem framing (1 paragraph)
+- 3 actionable strategies (subheadings + 80 words each)
+- CTA to book a free audit
+
+Do NOT use statistics you can't verify.
+Do NOT write a generic intro paragraph.</div>
+        <div class="qcard-issues">
+          <div class="issue-item"><div class="issue-icon" style="background:#d4f4eb;color:#0d5c40;">✓</div>Role, audience persona, tone rules, and forbidden patterns all specified</div>
+          <div class="issue-item"><div class="issue-icon" style="background:#d4f4eb;color:#0d5c40;">✓</div>Exact structure with per-section word counts</div>
+          <div class="issue-item"><div class="issue-icon" style="background:#d4f4eb;color:#0d5c40;">✓</div>Negative constraints eliminate common failure modes</div>
+        </div>
+      </div>
+
+      <div class="qcard q-prec">
+        <div class="qcard-head">
+          <div class="qcard-title">Example 2 — Code Task</div>
+          <div class="qcard-badge">Precise</div>
+        </div>
+        <div class="qcard-prompt copyable">You are a senior Python engineer. Python 3.11+.
+
+Write a function `sort_dicts(data, key, reverse=False)` that:
+1. Sorts a list of dicts by `key`, ascending by default
+2. Raises KeyError with message "Key '{key}' not found in all items" if any dict lacks the key
+3. Returns an empty list if input is empty (don't raise)
+4. Includes Google-style docstring with Args, Returns, Raises, and Example sections
+5. Uses type hints: `list[dict]` input, `str` key, `bool` reverse, returns `list[dict]`
+
+Do NOT use lambda — use operator.itemgetter for readability.
+Add a `# Example usage:` block at the bottom (not in a test file).</div>
+        <div class="qcard-issues">
+          <div class="issue-item"><div class="issue-icon" style="background:#d4f4eb;color:#0d5c40;">✓</div>Exact function signature, edge cases, and error messages defined</div>
+          <div class="issue-item"><div class="issue-icon" style="background:#d4f4eb;color:#0d5c40;">✓</div>Implementation preferences (no lambda) with reason given</div>
+          <div class="issue-item"><div class="issue-icon" style="background:#d4f4eb;color:#0d5c40;">✓</div>Claude produces exactly this — no interpretation needed</div>
+        </div>
+      </div>
+
+      <div class="score-section" style="background:rgba(29,158,117,0.04);border:1px solid rgba(29,158,117,0.18);">
+        <div style="font-size:13px;font-weight:600;margin-bottom:14px;color:#0d5c40;">Quality Scores</div>
+        <div class="score-row"><span class="score-label">Clarity</span>      <div class="score-track"><div class="score-fill" data-width="98%" style="background:#1d9e75;"></div></div><span class="score-val" style="color:#1d9e75;">98%</span></div>
+        <div class="score-row"><span class="score-label">Specificity</span>  <div class="score-track"><div class="score-fill" data-width="97%" style="background:#1d9e75;"></div></div><span class="score-val" style="color:#1d9e75;">97%</span></div>
+        <div class="score-row"><span class="score-label">Actionability</span><div class="score-track"><div class="score-fill" data-width="99%" style="background:#1d9e75;"></div></div><span class="score-val" style="color:#1d9e75;">99%</span></div>
+        <div class="score-row"><span class="score-label">Output Quality</span><div class="score-track"><div class="score-fill" data-width="97%" style="background:#1d9e75;"></div></div><span class="score-val" style="color:#1d9e75;">97%</span></div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<hr class="divider">
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     SECTION 04 — AT-A-GLANCE COMPARISON TABLE
+     ═══════════════════════════════════════════════════════════════ -->
+<section id="compare" class="section" aria-labelledby="compare-title">
+  <div class="wrapper">
+
+    <div class="section-label">Section 04</div>
+    <h2 class="section-title" id="compare-title">At-a-Glance Comparison</h2>
+    <p class="section-sub">How the four quality levels differ across seven key dimensions.</p>
+
+    <div class="table-wrap fade-in" role="region" aria-label="Quality comparison table" tabindex="0">
+      <table class="comp-table">
+        <thead>
+          <tr>
+            <th scope="col">Dimension</th>
+            <th scope="col" style="color:#b33;">Poor</th>
+            <th scope="col" style="color:#8a5500;">Average</th>
+            <th scope="col" style="color:#1a4aa0;">Nice</th>
+            <th scope="col" style="color:#0d5c40;">Precise</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Role defined?</td>
+            <td class="cell-poor">Never</td>
+            <td class="cell-avg">Rarely</td>
+            <td class="cell-nice">Sometimes</td>
+            <td class="cell-prec">Always</td>
+          </tr>
+          <tr>
+            <td>Context provided?</td>
+            <td class="cell-poor">None</td>
+            <td class="cell-avg">Topic only</td>
+            <td class="cell-nice">Task + audience</td>
+            <td class="cell-prec">Full situation + data shape</td>
+          </tr>
+          <tr>
+            <td>Output format</td>
+            <td class="cell-poor">Unspecified</td>
+            <td class="cell-avg">Implied</td>
+            <td class="cell-nice">Named (e.g. "blog post")</td>
+            <td class="cell-prec">Structured with section specs</td>
+          </tr>
+          <tr>
+            <td>Constraints</td>
+            <td class="cell-poor">None</td>
+            <td class="cell-avg">None</td>
+            <td class="cell-nice">A few</td>
+            <td class="cell-prec">Positive + negative constraints</td>
+          </tr>
+          <tr>
+            <td>Ambiguity level</td>
+            <td class="cell-poor">Very high</td>
+            <td class="cell-avg">High</td>
+            <td class="cell-nice">Medium</td>
+            <td class="cell-prec">Minimal</td>
+          </tr>
+          <tr>
+            <td>Revision cycles needed</td>
+            <td class="cell-poor">3–5+</td>
+            <td class="cell-avg">2–3</td>
+            <td class="cell-nice">1–2</td>
+            <td class="cell-prec">0–1</td>
+          </tr>
+          <tr>
+            <td>Output usability</td>
+            <td class="cell-poor">Unusable without heavy edit</td>
+            <td class="cell-avg">Needs refinement</td>
+            <td class="cell-nice">Good, minor tweaks</td>
+            <td class="cell-prec">Production-ready</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+</section>
+
+<hr class="divider">
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     SECTION 05 — THE UNIVERSAL PROMPT TEMPLATE
+     ═══════════════════════════════════════════════════════════════ -->
+<section id="template" class="section" style="background:var(--bg3);" aria-labelledby="template-title">
+  <div class="wrapper">
+
+    <div class="section-label">Section 05</div>
+    <h2 class="section-title" id="template-title">The Universal Prompt Template</h2>
+    <p class="section-sub">Copy, fill in the blanks, and adapt to any use case. Not every field is required — use what your task needs.</p>
+
+    <div class="template-block fade-in">
+      <h3>Master Prompt Template</h3>
+      <p class="sub">Fill in only what's relevant — not every field applies to every task.</p>
+
+      <!-- copyable class triggers initCopyButtons() in scripts.js -->
+      <div class="template-code copyable">
+<span class="tpl-comment"># ── ROLE (optional but powerful) ──────────────────────────</span>
+<span style="color:#82a8ff;">You are a</span> <span class="tpl-val">[expert type, e.g. "senior UX designer"]</span><span style="color:#82a8ff;"> with expertise in</span> <span class="tpl-val">[domain]</span>.
+
+<span class="tpl-comment"># ── CONTEXT ───────────────────────────────────────────────</span>
+<span style="color:#82a8ff;">Context:</span> <span class="tpl-val">[Current situation, what you have, what stage you're at, relevant data]</span>
+
+<span class="tpl-comment"># ── TASK ──────────────────────────────────────────────────</span>
+<span style="color:#82a8ff;">Task:</span> <span class="tpl-val">[Single, clear action verb + what to produce — "Write", "Analyze", "Rewrite"]</span>
+
+<span class="tpl-comment"># ── FORMAT ────────────────────────────────────────────────</span>
+<span style="color:#82a8ff;">Format:</span> <span class="tpl-val">[numbered list / JSON / markdown table / code block / prose / outline]</span>
+<span style="color:#82a8ff;">Length:</span> <span class="tpl-val">[Word count / line count / number of items]</span>
+
+<span class="tpl-comment"># ── AUDIENCE ──────────────────────────────────────────────</span>
+<span style="color:#82a8ff;">Audience:</span> <span class="tpl-val">[Who will read/use this? Technical level? Role?]</span>
+<span style="color:#82a8ff;">Tone:</span>     <span class="tpl-val">[Formal / casual / technical / empathetic / authoritative]</span>
+
+<span class="tpl-comment"># ── CONSTRAINTS ───────────────────────────────────────────</span>
+<span style="color:#82a8ff;">Do:</span>     <span class="tpl-val">[Must-include elements, standards, required keywords]</span>
+<span style="color:#82a8ff;">Do NOT:</span> <span class="tpl-val">[Forbidden elements, clichés, assumptions to avoid]</span>
+
+<span class="tpl-comment"># ── EXAMPLES (optional but high impact) ───────────────────</span>
+<span style="color:#82a8ff;">Example of good output:</span> <span class="tpl-val">[Paste a sample that shows the quality/style you want]</span>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<hr class="divider">
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     SECTION 06 — 10 BEST PRACTICES
+     Filterable grid of tip cards.
+     data-category is used by filterPractices() in scripts.js.
+     ═══════════════════════════════════════════════════════════════ -->
+<section id="practices" class="section" aria-labelledby="practices-title">
+  <div class="wrapper">
+
+    <div class="section-label">Section 06</div>
+    <h2 class="section-title" id="practices-title">10 Best Practices</h2>
+    <p class="section-sub">Proven techniques that reliably improve output quality — pick any one and your prompts get better immediately.</p>
+
+    <!-- Filter bar — onclick calls filterPractices() -->
+    <div class="filter-bar" role="group" aria-label="Filter practices by category">
+      <button class="filter-btn active" onclick="filterPractices('all',this)">All</button>
+      <button class="filter-btn"        onclick="filterPractices('structure',this)">Structure</button>
+      <button class="filter-btn"        onclick="filterPractices('output',this)">Output</button>
+      <button class="filter-btn"        onclick="filterPractices('clarity',this)">Clarity</button>
+      <button class="filter-btn"        onclick="filterPractices('quality',this)">Quality</button>
+    </div>
+
+    <div class="practices-grid" role="list">
+
+      <!-- Each card has data-category for filtering -->
+      <div class="practice-card fade-in" data-category="structure" role="listitem">
+        <div class="practice-icon" style="background:rgba(232,83,62,0.1);">🎭</div>
+        <h4>Assign a Role</h4>
+        <p>Start with <code>You are a [expert]</code>. It frames Claude's knowledge activation and writing style from the first token generated.</p>
+      </div>
+
+      <div class="practice-card fade-in" data-category="clarity" role="listitem">
+        <div class="practice-icon" style="background:rgba(59,111,212,0.1);">🧩</div>
+        <h4>One Task Per Prompt</h4>
+        <p>Avoid "write X, then analyze Y, then suggest Z." Break compound requests into separate prompts. Multi-goal prompts dilute focus.</p>
+      </div>
+
+      <div class="practice-card fade-in" data-category="quality" role="listitem">
+        <div class="practice-icon" style="background:rgba(29,158,117,0.1);">📐</div>
+        <h4>Use Positive + Negative Constraints</h4>
+        <p>Tell Claude what TO do AND what NOT to do. <code>Do NOT use bullet points</code> is as powerful as specifying the format directly.</p>
+      </div>
+
+      <div class="practice-card fade-in" data-category="clarity" role="listitem">
+        <div class="practice-icon" style="background:rgba(124,92,191,0.1);">🔢</div>
+        <h4>Request Step-by-Step Reasoning</h4>
+        <p>Add <code>Think step by step</code> for complex tasks. This activates chain-of-thought internally and dramatically improves accuracy.</p>
+      </div>
+
+      <div class="practice-card fade-in" data-category="quality" role="listitem">
+        <div class="practice-icon" style="background:rgba(242,162,74,0.1);">📎</div>
+        <h4>Provide a Sample Output</h4>
+        <p>One concrete example of the style or quality you want is worth ten adjectives describing it. Show, don't just tell.</p>
+      </div>
+
+      <div class="practice-card fade-in" data-category="structure" role="listitem">
+        <div class="practice-icon" style="background:rgba(232,83,62,0.1);">🏷️</div>
+        <h4>Use XML Tags for Structure</h4>
+        <p>Wrap sections in tags: <code>&lt;context&gt;</code>, <code>&lt;task&gt;</code>, <code>&lt;format&gt;</code>. Claude parses these cleanly in long prompts.</p>
+      </div>
+
+      <div class="practice-card fade-in" data-category="output" role="listitem">
+        <div class="practice-icon" style="background:rgba(59,111,212,0.1);">📏</div>
+        <h4>Specify Exact Length</h4>
+        <p>"Write a summary" is vague. "Write a 3-sentence summary under 80 words" is a directive. Length specificity controls verbosity.</p>
+      </div>
+
+      <div class="practice-card fade-in" data-category="output" role="listitem">
+        <div class="practice-icon" style="background:rgba(29,158,117,0.1);">🎯</div>
+        <h4>Name Your Audience</h4>
+        <p>"Explain to a 5-year-old" vs "Explain to a PhD" produces radically different outputs from the same task. Audience is a force multiplier.</p>
+      </div>
+
+      <div class="practice-card fade-in" data-category="clarity" role="listitem">
+        <div class="practice-icon" style="background:rgba(124,92,191,0.1);">🔄</div>
+        <h4>Iterate, Don't Restart</h4>
+        <p>Use follow-ups like <code>Revise section 2 to be more concise</code> rather than rewriting the whole prompt. Claude holds conversation context.</p>
+      </div>
+
+      <div class="practice-card fade-in" data-category="quality" role="listitem">
+        <div class="practice-icon" style="background:rgba(242,162,74,0.1);">⚠️</div>
+        <h4>State the Failure Mode</h4>
+        <p>Tell Claude what a bad response looks like: <code>If you're uncertain, say so rather than guessing</code>. Sets quality expectations explicitly.</p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     SECTION 07 — QUICK REFERENCE CHEAT SHEET
+     ═══════════════════════════════════════════════════════════════ -->
+<section id="cheatsheet" class="section" style="background:var(--bg3);" aria-labelledby="cheatsheet-title">
+  <div class="wrapper">
+
+    <div class="section-label">Section 07</div>
+    <h2 class="section-title" id="cheatsheet-title">Quick Reference Cheat Sheet</h2>
+    <p class="section-sub">Power phrases and patterns that reliably improve prompt performance. Bookmark this page and come back.</p>
+
+    <div class="cheat-grid fade-in">
+
+      <div class="cheat-card">
+        <div class="cheat-head">
+          <div class="cheat-head-dot" style="background:var(--accent);"></div>
+          Tone &amp; Style
+        </div>
+        <div class="cheat-list">
+          <div class="cheat-item">Write in a direct, conversational tone — no corporate jargon</div>
+          <div class="cheat-item">Use active voice throughout</div>
+          <div class="cheat-item">Avoid adverbs like "very", "extremely", "really"</div>
+          <div class="cheat-item">Sound like [specific person or brand] — not like AI</div>
+          <div class="cheat-item">Match the energy of the audience: [describe them]</div>
+        </div>
+      </div>
+
+      <div class="cheat-card">
+        <div class="cheat-head">
+          <div class="cheat-head-dot" style="background:var(--blue);"></div>
+          Output Format
+        </div>
+        <div class="cheat-list">
+          <div class="cheat-item">Respond only in JSON with keys: [list them]</div>
+          <div class="cheat-item">Use markdown with H2 headers and bullet points</div>
+          <div class="cheat-item">Output as a numbered list, max 1 sentence per item</div>
+          <div class="cheat-item">Start with a 1-line summary, then details below</div>
+          <div class="cheat-item">Return only the code — no explanation unless asked</div>
+        </div>
+      </div>
+
+      <div class="cheat-card">
+        <div class="cheat-head">
+          <div class="cheat-head-dot" style="background:var(--teal);"></div>
+          Reasoning Triggers
+        </div>
+        <div class="cheat-list">
+          <div class="cheat-item">Think step by step before answering</div>
+          <div class="cheat-item">First identify what information is missing</div>
+          <div class="cheat-item">Before responding, restate the problem in your own words</div>
+          <div class="cheat-item">Consider edge cases and mention any assumptions</div>
+          <div class="cheat-item">If there are multiple valid approaches, list them first</div>
+        </div>
+      </div>
+
+      <div class="cheat-card">
+        <div class="cheat-head">
+          <div class="cheat-head-dot" style="background:var(--purple);"></div>
+          Guardrails &amp; Quality
+        </div>
+        <div class="cheat-list">
+          <div class="cheat-item">Do NOT start with "Certainly!", "Great question!", or filler phrases</div>
+          <div class="cheat-item">If unsure, say "I'm not certain" rather than guessing</div>
+          <div class="cheat-item">Do NOT pad the response with obvious context I already know</div>
+          <div class="cheat-item">After responding, rate your own confidence (1–5) with a reason</div>
+          <div class="cheat-item">Cite any statistics you include — do not invent numbers</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     SECTION 08 — INTERACTIVE PROMPT BUILDER  ✨ NEW
+     Users fill in fields → live preview assembles the prompt
+     buildPrompt() in scripts.js handles the assembly.
+     ═══════════════════════════════════════════════════════════════ -->
+<section id="builder" class="section" aria-labelledby="builder-title">
+  <div class="wrapper">
+
+    <div class="section-label">Section 08 — Interactive</div>
+    <h2 class="section-title" id="builder-title">Build Your Prompt</h2>
+    <p class="section-sub">
+      Fill in the fields below and watch your prompt assemble in real time.
+      Use the quick-fill buttons to see how a complete example looks.
+    </p>
+
+    <!-- Quick-fill buttons for example prompts -->
+    <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:32px;">
+      <button class="btn-secondary" onclick="fillExample('code')"     aria-label="Load code example">Load: Code Example</button>
+      <button class="btn-secondary" onclick="fillExample('writing')"  aria-label="Load writing example">Load: Writing Example</button>
+      <button class="btn-secondary" onclick="fillExample('analysis')" aria-label="Load analysis example">Load: Analysis Example</button>
+    </div>
+
+    <div class="builder-wrap">
+
+      <!-- LEFT: form fields -->
+      <form class="builder-form" onsubmit="return false;" aria-label="Prompt builder form">
+
+        <div class="field-group">
+          <label class="field-label" for="b-role">
+            <span class="field-dot" style="background:#e8533e;"></span>
+            Role <span style="color:var(--muted);font-weight:400;">(optional)</span>
+          </label>
+          <input
+            type="text"
+            id="b-role"
+            class="field-input"
+            placeholder="e.g. senior Python engineer"
+            oninput="buildPrompt()"
+            autocomplete="off">
+        </div>
+
+        <div class="field-group">
+          <label class="field-label" for="b-context">
+            <span class="field-dot" style="background:#3b6fd4;"></span>
+            Context
+          </label>
+          <textarea
+            id="b-context"
+            class="field-textarea"
+            placeholder="Current situation, what you have, relevant background..."
+            oninput="buildPrompt()"></textarea>
+        </div>
+
+        <div class="field-group">
+          <label class="field-label" for="b-task">
+            <span class="field-dot" style="background:#1d9e75;"></span>
+            Task
+          </label>
+          <textarea
+            id="b-task"
+            class="field-textarea"
+            placeholder="What specific action do you want Claude to perform?"
+            oninput="buildPrompt()"></textarea>
+        </div>
+
+        <div class="field-group">
+          <label class="field-label" for="b-format">
+            <span class="field-dot" style="background:#f2a24a;"></span>
+            Format <span style="color:var(--muted);font-weight:400;">(optional)</span>
+          </label>
+          <input
+            type="text"
+            id="b-format"
+            class="field-input"
+            placeholder="e.g. numbered list, JSON, markdown table"
+            oninput="buildPrompt()">
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+          <div class="field-group">
+            <label class="field-label" for="b-audience">
+              <span class="field-dot" style="background:#7c5cbf;"></span>
+              Audience
+            </label>
+            <input
+              type="text"
+              id="b-audience"
+              class="field-input"
+              placeholder="e.g. junior developer"
+              oninput="buildPrompt()">
+          </div>
+          <div class="field-group">
+            <label class="field-label" for="b-tone">
+              <span class="field-dot" style="background:#9393b0;"></span>
+              Tone
+            </label>
+            <input
+              type="text"
+              id="b-tone"
+              class="field-input"
+              placeholder="e.g. casual, technical"
+              oninput="buildPrompt()">
+          </div>
+        </div>
+
+        <div class="field-group">
+          <label class="field-label" for="b-do">
+            <span class="field-dot" style="background:#1d9e75;"></span>
+            Do (must-haves)
+          </label>
+          <textarea
+            id="b-do"
+            class="field-textarea"
+            placeholder="Things Claude should include or follow..."
+            oninput="buildPrompt()"></textarea>
+        </div>
+
+        <div class="field-group">
+          <label class="field-label" for="b-donot">
+            <span class="field-dot" style="background:#e8533e;"></span>
+            Do NOT (must-avoids)
+          </label>
+          <textarea
+            id="b-donot"
+            class="field-textarea"
+            placeholder="Things Claude should never do or include..."
+            oninput="buildPrompt()"></textarea>
+        </div>
+
+        <div class="field-group">
+          <label class="field-label" for="b-example">
+            <span class="field-dot" style="background:#f2a24a;"></span>
+            Example of good output <span style="color:var(--muted);font-weight:400;">(optional)</span>
+          </label>
+          <textarea
+            id="b-example"
+            class="field-textarea"
+            placeholder="Paste a sample showing the quality or style you want..."
+            oninput="buildPrompt()"></textarea>
+        </div>
+
+        <!-- Action buttons -->
+        <div class="builder-actions">
+          <button type="button" class="btn-primary" onclick="copyPreview()" aria-label="Copy assembled prompt">
+            Copy Prompt
+          </button>
+          <button type="button" class="btn-secondary" onclick="clearBuilder()" aria-label="Clear all fields">
+            Clear
+          </button>
+        </div>
+
+      </form><!-- /builder-form -->
+
+      <!-- RIGHT: live preview panel -->
+      <div class="builder-preview" role="region" aria-label="Assembled prompt preview" aria-live="polite">
+
+        <div class="preview-label">
+          <span>Live Preview</span>
+          <button
+            id="preview-copy"
+            class="preview-copy-btn"
+            onclick="copyPreview()"
+            aria-label="Copy preview to clipboard">
+            Copy
+          </button>
+        </div>
+
+        <!-- Assembled prompt output — updated by buildPrompt() -->
+        <div id="preview-output" class="preview-output" style="display:none;"></div>
+
+        <!-- Shown when builder is empty -->
+        <div id="preview-placeholder" class="preview-placeholder">
+          Start filling in the fields on the left and your assembled
+          prompt will appear here, formatted and ready to copy.
+          <br><br>
+          Or click one of the <strong style="color:rgba(255,255,255,0.6)">Load Example</strong> buttons above.
+        </div>
+
+        <!-- Character and token count -->
+        <div id="preview-chars" class="preview-chars" aria-label="Character count"></div>
+
+      </div><!-- /builder-preview -->
+
+    </div><!-- /builder-wrap -->
+
+  </div>
+</section>
+
+<hr class="divider">
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     SECTION 09 — COMMON MISTAKES & FIXES  ✨ NEW
+     FAQ accordion — click a question to reveal the answer.
+     toggleFAQ() in scripts.js handles the expand/collapse.
+     ═══════════════════════════════════════════════════════════════ -->
+<section id="mistakes" class="section" style="background:var(--bg3);" aria-labelledby="mistakes-title">
+  <div class="wrapper">
+
+    <div class="section-label">Section 09 — Troubleshoot</div>
+    <h2 class="section-title" id="mistakes-title">Common Mistakes &amp; Fixes</h2>
+    <p class="section-sub">
+      Even experienced users make these mistakes. Each one is easy to fix once
+      you know what to look for.
+    </p>
+
+    <div class="faq-list fade-in" role="list">
+
+      <!-- ── Mistake 1 ── -->
+      <div class="faq-item" role="listitem">
+        <div class="faq-question" onclick="toggleFAQ(this)" role="button" aria-expanded="false" tabindex="0">
+          <div style="display:flex;align-items:center;gap:12px;flex:1;">
+            <span class="faq-num">01</span>
+            <span>Asking Claude to fix code without sharing the code</span>
+          </div>
+          <span class="faq-chevron" aria-hidden="true">▾</span>
+        </div>
+        <div class="faq-answer">
+          <div class="faq-answer-inner">
+            <p>Claude cannot see your screen or access your files. If you say "fix my code" without pasting it, Claude can only respond generically. Always paste the exact relevant code block.</p>
+            <div class="mini-compare">
+              <div class="mini-box bad">
+                <div class="mini-box-label">Bad</div>
+                Fix my sorting function, it's returning the wrong order.
+              </div>
+              <div class="mini-box good">
+                <div class="mini-box-label">Good</div>
+                Fix this Python function — it should sort ascending but returns descending: [paste code]
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Mistake 2 ── -->
+      <div class="faq-item" role="listitem">
+        <div class="faq-question" onclick="toggleFAQ(this)" role="button" aria-expanded="false" tabindex="0">
+          <div style="display:flex;align-items:center;gap:12px;flex:1;">
+            <span class="faq-num">02</span>
+            <span>Using vague verbs — "write about", "do something with", "handle"</span>
+          </div>
+          <span class="faq-chevron" aria-hidden="true">▾</span>
+        </div>
+        <div class="faq-answer">
+          <div class="faq-answer-inner">
+            <p><strong>Vague verbs force Claude to guess the format and depth.</strong> Use strong, specific verbs: <code>summarize</code>, <code>compare</code>, <code>rewrite</code>, <code>extract</code>, <code>generate</code>, <code>classify</code>.</p>
+            <div class="mini-compare">
+              <div class="mini-box bad">
+                <div class="mini-box-label">Bad</div>
+                Do something with this customer feedback list.
+              </div>
+              <div class="mini-box good">
+                <div class="mini-box-label">Good</div>
+                Classify each piece of feedback as Bug / Feature Request / Compliment. Return a JSON array.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Mistake 3 ── -->
+      <div class="faq-item" role="listitem">
+        <div class="faq-question" onclick="toggleFAQ(this)" role="button" aria-expanded="false" tabindex="0">
+          <div style="display:flex;align-items:center;gap:12px;flex:1;">
+            <span class="faq-num">03</span>
+            <span>Loading one prompt with five different tasks</span>
+          </div>
+          <span class="faq-chevron" aria-hidden="true">▾</span>
+        </div>
+        <div class="faq-answer">
+          <div class="faq-answer-inner">
+            <p>Multi-goal prompts cause diluted, mediocre results across all tasks. Claude cannot give full attention to all five things simultaneously. Break them into separate messages in the same conversation.</p>
+            <p style="margin-top:10px;">Rule of thumb: <strong>one verb = one prompt.</strong> "Summarize AND translate AND suggest improvements AND format as JSON AND check for errors" should be 5 follow-up messages.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Mistake 4 ── -->
+      <div class="faq-item" role="listitem">
+        <div class="faq-question" onclick="toggleFAQ(this)" role="button" aria-expanded="false" tabindex="0">
+          <div style="display:flex;align-items:center;gap:12px;flex:1;">
+            <span class="faq-num">04</span>
+            <span>Assuming Claude knows your codebase, project, or company context</span>
+          </div>
+          <span class="faq-chevron" aria-hidden="true">▾</span>
+        </div>
+        <div class="faq-answer">
+          <div class="faq-answer-inner">
+            <p>Every new conversation starts with zero context. Claude doesn't know your tech stack, your team's conventions, your existing functions, or your business domain. You need to tell it.</p>
+            <p style="margin-top:10px;">Tip: create a short "context block" you paste at the start of each session — e.g. tech stack, coding conventions, relevant file structure. Takes 30 seconds, saves many revision cycles.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Mistake 5 ── -->
+      <div class="faq-item" role="listitem">
+        <div class="faq-question" onclick="toggleFAQ(this)" role="button" aria-expanded="false" tabindex="0">
+          <div style="display:flex;align-items:center;gap:12px;flex:1;">
+            <span class="faq-num">05</span>
+            <span>Not specifying format — then complaining the response isn't formatted right</span>
+          </div>
+          <span class="faq-chevron" aria-hidden="true">▾</span>
+        </div>
+        <div class="faq-answer">
+          <div class="faq-answer-inner">
+            <p>If you don't specify a format, Claude picks what it thinks is most appropriate — which may not be what you need. Always tell it: <code>respond only in JSON</code>, <code>use a markdown table</code>, <code>numbered list</code>, <code>plain prose</code>, etc.</p>
+            <div class="mini-compare">
+              <div class="mini-box bad">
+                <div class="mini-box-label">Bad</div>
+                List the pros and cons of React vs Vue.
+              </div>
+              <div class="mini-box good">
+                <div class="mini-box-label">Good</div>
+                List pros and cons of React vs Vue as a markdown table with columns: Category | React | Vue.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Mistake 6 ── -->
+      <div class="faq-item" role="listitem">
+        <div class="faq-question" onclick="toggleFAQ(this)" role="button" aria-expanded="false" tabindex="0">
+          <div style="display:flex;align-items:center;gap:12px;flex:1;">
+            <span class="faq-num">06</span>
+            <span>Using "just" and "simply" — setting unrealistic expectations</span>
+          </div>
+          <span class="faq-chevron" aria-hidden="true">▾</span>
+        </div>
+        <div class="faq-answer">
+          <div class="faq-answer-inner">
+            <p>Words like "just", "simply", "quickly", and "easy" don't add information — they add pressure without precision. They can also cause Claude to skip important nuance or skip explaining trade-offs.</p>
+            <p style="margin-top:10px;">Replace them with specific scope or detail level: instead of "just summarize this," say "summarize in 3 bullet points, each under 15 words."</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Mistake 7 ── -->
+      <div class="faq-item" role="listitem">
+        <div class="faq-question" onclick="toggleFAQ(this)" role="button" aria-expanded="false" tabindex="0">
+          <div style="display:flex;align-items:center;gap:12px;flex:1;">
+            <span class="faq-num">07</span>
+            <span>No constraints = no quality control</span>
+          </div>
+          <span class="faq-chevron" aria-hidden="true">▾</span>
+        </div>
+        <div class="faq-answer">
+          <div class="faq-answer-inner">
+            <p>Without constraints, Claude fills gaps with common defaults — which may not match your context. Constraints are not restrictions on Claude's ability; they're guardrails that eliminate the most common failure modes.</p>
+            <p style="margin-top:10px;"><strong>Negative constraints are especially powerful:</strong> "Do NOT use passive voice," "Do NOT include statistics unless cited," "Do NOT add an introduction paragraph." Each one removes a common mistake before it happens.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Mistake 8 ── -->
+      <div class="faq-item" role="listitem">
+        <div class="faq-question" onclick="toggleFAQ(this)" role="button" aria-expanded="false" tabindex="0">
+          <div style="display:flex;align-items:center;gap:12px;flex:1;">
+            <span class="faq-num">08</span>
+            <span>Giving up after one bad response instead of iterating</span>
+          </div>
+          <span class="faq-chevron" aria-hidden="true">▾</span>
+        </div>
+        <div class="faq-answer">
+          <div class="faq-answer-inner">
+            <p>A bad first response is diagnostic information, not failure. It tells you what context or constraint was missing. Use follow-up prompts to steer: <code>The tone is too formal — rewrite it as casual</code>, or <code>The second section is too long, cut it to 2 sentences</code>.</p>
+            <p style="margin-top:10px;">Claude holds full conversation context — you never have to repeat what you said earlier. Just describe what needs to change.</p>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /faq-list -->
+
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     FOOTER
+     ═══════════════════════════════════════════════════════════════ -->
+<footer class="footer" role="contentinfo">
+  <strong>Claude Prompt Engineering Guide</strong> ·
+  Built for AI specialists and developers working with Claude<br>
+  Anthropic Claude Sonnet 4.6 · Prompt engineering best practices · 2025 ·
+  <a href="https://docs.anthropic.com/claude/docs" target="_blank" rel="noopener noreferrer">Claude Docs ↗</a>
+</footer>
+
+
+<!-- Back to Top floating button -->
+<button
+  id="backToTop"
+  class="back-to-top"
+  onclick="scrollToTop()"
+  aria-label="Scroll back to top"
+  title="Back to top">
+  ↑
+</button>
+
+
+<!-- ─────────────────────────────────────────────────────────────
+     SCRIPTS
+     Load our scripts.js last so the full DOM is available.
+     ───────────────────────────────────────────────────────────── -->
+<script src="scripts.js"></script>
+
+</body>
+</html>
