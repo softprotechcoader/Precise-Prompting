@@ -697,4 +697,4 @@ Every assumption Claude makes is an opportunity for misalignment. Your job as a 
 
 ---
 
-*Claude Prompt Engineering Guide · AI Specialist Reference · Anthropic Claude Sonnet 4.6 · 2025*
+*Claude Prompt Engineering Guide · AI Specialist Reference · Anthropic Claude Sonnet 4.6 · 2026*
